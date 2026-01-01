@@ -1,5 +1,4 @@
-from google import genai
-from google.genai import types
+from groq import Groq
 import json
 from typing import Dict, List, Optional
 from app.config import get_settings
@@ -7,8 +6,8 @@ from app.models.grammar import Grammar
 
 settings = get_settings()
 
-# Configure Gemini with new API
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
+# Configure Groq client
+client = Groq(api_key=settings.GROQ_API_KEY)
 
 
 async def generate_explanation(grammar_rule: Grammar) -> str:
@@ -35,11 +34,11 @@ Write 3 short paragraphs (max 150 words):
 Use markdown (##, **). Conversational Russian."""
 
     try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}]
         )
-        return response.text
+        return response.choices[0].message.content
     except Exception as e:
         return f"Ошибка при генерации объяснения: {str(e)}"
 
@@ -99,11 +98,11 @@ JSON format:
 {{"question": "instruction", "correct_answer": "example answer"}}"""
 
     try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}]
         )
-        result_text = response.text.strip()
+        result_text = response.choices[0].message.content.strip()
 
         # Clean JSON response
         if result_text.startswith("```json"):
@@ -169,11 +168,11 @@ Write (max 150 words):
 Tone: kind, simple Russian, markdown formatting."""
 
     try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}]
         )
-        explanation = response.text
+        explanation = response.choices[0].message.content
 
         # Try to find related rules (simplified)
         related_rules = []
@@ -224,11 +223,11 @@ Format:
 2. [question 2]"""
 
     try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}]
         )
-        return response.text
+        return response.choices[0].message.content
     except Exception as e:
         return f"Ошибка при генерации вопросов: {str(e)}"
 
@@ -260,11 +259,11 @@ Requirements:
 JSON only, no markdown."""
 
     try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}]
         )
-        result_text = response.text.strip()
+        result_text = response.choices[0].message.content.strip()
 
         # Clean JSON response
         if result_text.startswith("```json"):
@@ -311,11 +310,11 @@ Requirements:
 JSON only, no markdown."""
 
     try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=[{"role": "user", "content": prompt}]
         )
-        result_text = response.text.strip()
+        result_text = response.choices[0].message.content.strip()
 
         # Clean JSON response
         if result_text.startswith("```json"):
