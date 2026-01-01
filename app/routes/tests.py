@@ -62,7 +62,7 @@ async def get_test_question(
     result = await db.execute(
         select(Grammar)
         .where(Grammar.level == level.upper())
-        .order_by(Grammar.id)  # Random would be func.random() but simpler for now
+        .order_by(func.random())  # Properly random selection
         .limit(1)
     )
     grammar_rule = result.scalar_one_or_none()

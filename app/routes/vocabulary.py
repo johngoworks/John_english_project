@@ -141,8 +141,9 @@ async def practice_card(
             {"request": request, "level": level}
         )
 
-    # Take first word from the queue
-    word = words[0]
+    # Randomly select one word from the queue (not always first)
+    import random
+    word = random.choice(words)
     remaining_count = len(words) - 1
 
     # Generate translation options using Gemini
