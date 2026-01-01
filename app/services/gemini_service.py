@@ -21,42 +21,18 @@ async def generate_explanation(grammar_rule: Grammar) -> str:
     Returns:
         str: Объяснение на русском (2-3 параграфа)
     """
-    prompt = f"""You are an experienced English teacher. Explain the following grammar rule in Russian using simple and clear language.
+    prompt = f"""English teacher. Explain in Russian, simple language.
 
-**Grammar Rule Information:**
-- Rule: {grammar_rule.guideword}
-- Level: {grammar_rule.level}
-- Category: {grammar_rule.super_category} - {grammar_rule.sub_category}
-- Can-do statement: {grammar_rule.can_do_statement}
-- Examples: {grammar_rule.example}
+Rule: {grammar_rule.guideword}
+Level: {grammar_rule.level}
+Examples: {grammar_rule.example[:200]}
 
-**Your task:**
-Create a clear explanation in Russian with exactly 3 short paragraphs (max 4 sentences each):
+Write 3 short paragraphs (max 150 words):
+1. What/when to use
+2. How to use + 1 example
+3. Common mistakes
 
-1. **Что это?** - What is this rule and when to use it
-2. **Как использовать?** - How to apply it with simple examples
-3. **На что обратить внимание?** - Common mistakes to avoid
-
-**Requirements:**
-- Write in simple, conversational Russian
-- Use markdown formatting (bold, lists where appropriate)
-- Be concise but complete
-- Add 1-2 practical examples in English with Russian explanations
-- Total length: 150-250 words
-
-**Example format:**
-## Что это за правило?
-
-[Your explanation here]
-
-## Как использовать?
-
-[Your explanation with examples here]
-
-## Типичные ошибки
-
-[Common mistakes here]
-"""
+Use markdown (##, **). Conversational Russian."""
 
     try:
         response = client.models.generate_content(
@@ -84,88 +60,43 @@ async def generate_test(grammar_rule: Grammar, question_type: str = "multiple_ch
         }
     """
     if question_type == "multiple_choice":
-        prompt = f"""You are an English test creator. Create a multiple-choice question to test knowledge of this grammar rule.
+        prompt = f"""Create multiple-choice test. JSON only.
 
-**Grammar Rule:**
-- Rule: {grammar_rule.guideword}
-- Level: {grammar_rule.level}
-- Description: {grammar_rule.can_do_statement}
-- Examples: {grammar_rule.example[:500]}
+Rule: {grammar_rule.guideword} ({grammar_rule.level})
+Examples: {grammar_rule.example[:200]}
 
-**Task:**
-Create a practical test question with 4 answer options.
+Requirements:
+- Complete sentence with blank/choice
+- 4 plausible options (1 correct)
+- Tests specific rule understanding
 
-**Example:**
-{{
-    "question": "Choose the correct form: She ___ to the store yesterday.",
-    "options": ["go", "goes", "went", "going"],
-    "correct_answer": "went"
-}}
+JSON format:
+{{"question": "sentence here", "options": ["A","B","C","D"], "correct_answer": "exact match"}}"""
 
-**Requirements:**
-- Question must be a complete sentence with a blank or choice scenario
-- All 4 options must be grammatically plausible (only 1 correct)
-- Options should test understanding of the specific rule
-- Difficulty appropriate for {grammar_rule.level} level
-- Question and options in English
-
-**Return ONLY valid JSON (no markdown, no explanations):**
-{{
-    "question": "Complete sentence or question here",
-    "options": ["option A", "option B", "option C", "option D"],
-    "correct_answer": "exact match of one option"
-}}
-"""
     elif question_type == "fill_blank":
-        prompt = f"""You are an English test creator. Create a fill-in-the-blank question for this grammar rule.
+        prompt = f"""Create fill-blank test. JSON only.
 
-**Grammar Rule:**
-- Rule: {grammar_rule.guideword}
-- Level: {grammar_rule.level}
-- Description: {grammar_rule.can_do_statement}
+Rule: {grammar_rule.guideword} ({grammar_rule.level})
 
-**Example:**
-{{
-    "question": "She ___ (go) to Paris last summer.",
-    "correct_answer": "went"
-}}
+Requirements:
+- Use ___ for blank
+- 1-3 word answer
+- Level-appropriate
 
-**Requirements:**
-- Use ___ to mark the blank
-- Provide hints in parentheses if needed
-- Answer should be 1-3 words
-- Appropriate for {grammar_rule.level} level
+JSON format:
+{{"question": "sentence with ___", "correct_answer": "answer"}}"""
 
-**Return ONLY valid JSON:**
-{{
-    "question": "Complete sentence with ___ blank",
-    "correct_answer": "short answer"
-}}
-"""
     else:  # open_ended
-        prompt = f"""You are an English test creator. Create an open-ended question for this grammar rule.
+        prompt = f"""Create open-ended test. JSON only.
 
-**Grammar Rule:**
-- Rule: {grammar_rule.guideword}
-- Level: {grammar_rule.level}
+Rule: {grammar_rule.guideword} ({grammar_rule.level})
 
-**Example:**
-{{
-    "question": "Write a sentence using the past simple tense to describe what you did yesterday.",
-    "correct_answer": "I went to the park and played football with my friends."
-}}
+Requirements:
+- Creative use of rule
+- 1-2 sentences expected
 
-**Requirements:**
-- Question should prompt creative use of the grammar rule
-- Expected answer: 1-2 sentences
-- Level-appropriate vocabulary
-
-**Return ONLY valid JSON:**
-{{
-    "question": "Clear instruction for the student",
-    "correct_answer": "Example acceptable answer"
-}}
-"""
+JSON format:
+{{"question": "instruction", "correct_answer": "example answer"}}"""
 
     try:
         response = client.models.generate_content(
@@ -218,34 +149,24 @@ async def analyze_error(
             "related_rules": List[str] - ID связанных правил
         }
     """
-    prompt = f"""You are a supportive English teacher. A student made a mistake. Help them understand what went wrong.
+    prompt = f"""Supportive English teacher. Student made mistake. Help in Russian.
 
-**Context:**
-- Grammar rule: {grammar_rule.guideword}
-- Question: {question}
-- Student's answer: {user_answer}
-- Correct answer: {correct_answer}
+Rule: {grammar_rule.guideword}
+Q: {question}
+Student: {user_answer}
+Correct: {correct_answer}
 
-**Your task:**
-Provide encouraging feedback in Russian with this structure:
-
-## Почему это ошибка?
-[Explain in 1-2 sentences why the student's answer is wrong]
+Write (max 150 words):
+## Почему ошибка?
+[1-2 sentences]
 
 ## Правильное объяснение
-[Re-explain the rule in simpler terms, 2-3 sentences]
-[Add 1 example in English with Russian translation]
+[2-3 sentences + 1 example]
 
-## Совет на будущее
-[One specific tip to avoid this mistake next time]
+## Совет
+[specific tip]
 
-**Tone:**
-- Be kind and encouraging
-- Use simple, conversational Russian
-- Focus on learning, not the mistake
-- Keep total response under 200 words
-- Use markdown formatting (##, **, lists)
-"""
+Tone: kind, simple Russian, markdown formatting."""
 
     try:
         response = client.models.generate_content(
@@ -285,30 +206,22 @@ async def chat_progress_check(user_id: int, level: str, completed_rules: List[st
     Returns:
         str: Вопросы и оценка от AI
     """
-    prompt = f"""You are an experienced English teacher. A student has completed level {level} with {len(completed_rules)} grammar rules studied.
+    prompt = f"""English teacher. Student completed {level} ({len(completed_rules)} rules).
 
-**Your task:**
-Ask 2-3 assessment questions in Russian to check if they're ready for the next level.
+Task: Ask 2-3 assessment questions in Russian to check readiness for next level.
 
-**Requirements:**
-- Write questions in Russian
-- Test overall understanding of {level} grammar concepts
-- Questions should be specific, not general
-- Mix different grammar topics from {level}
-- Be friendly and encouraging
-- Format with numbered list
+Requirements:
+- Questions in Russian
+- Test {level} grammar understanding
+- Specific, not general
+- Friendly tone
+- Numbered list with ##
 
-**Example:**
-## Проверочные вопросы для уровня {level}
+Format:
+## Проверочные вопросы {level}
 
-Давай проверим, готов ли ты двигаться дальше:
-
-1. [Specific question about grammar topic 1]
-2. [Specific question about grammar topic 2]
-3. [Specific question about grammar topic 3]
-
-Ответь на эти вопросы, и я пойму, готов ли ты к следующему уровню!
-"""
+1. [question 1]
+2. [question 2]"""
 
     try:
         response = client.models.generate_content(
@@ -335,40 +248,16 @@ async def generate_word_examples(word: str, word_class: str, level: str) -> Dict
             "examples": List[str] - 3-4 примера использования
         }
     """
-    prompt = f"""You are an English vocabulary teacher. Create an explanation and examples for this word.
+    prompt = f"""Vocabulary teacher. Word: {word} ({word_class}, {level.upper()})
 
-**Word Information:**
-- Word: {word}
-- Part of speech: {word_class}
-- CEFR Level: {level.upper()}
+Create JSON:
+{{"explanation": "Russian meaning 1-2 sentences", "examples": ["sentence1", "sentence2", "sentence3"]}}
 
-**Example output:**
-{{
-    "explanation": "Book (существительное) - это книга, печатное издание с текстом. Также может быть глаголом - бронировать, заказывать.",
-    "examples": [
-        "I'm reading a book about history.",
-        "She books a hotel room online every time she travels.",
-        "The library has thousands of books on different topics."
-    ]
-}}
+Requirements:
+- Explanation: Russian, mention multiple meanings if any
+- Examples: English, different contexts, {level.upper()}-appropriate, practical usage
 
-**Requirements:**
-- Explanation: Brief meaning in Russian (1-2 sentences), mention multiple meanings if applicable
-- Examples: 3 sentences in English showing different contexts/meanings
-- Examples must be appropriate for {level.upper()} level
-- Examples should show practical, common usage
-- Use natural, everyday English
-
-**Return ONLY valid JSON (no markdown):**
-{{
-    "explanation": "Russian explanation (1-2 sentences)",
-    "examples": [
-        "Example sentence 1",
-        "Example sentence 2",
-        "Example sentence 3"
-    ]
-}}
-"""
+JSON only, no markdown."""
 
     try:
         response = client.models.generate_content(
@@ -410,37 +299,16 @@ async def generate_word_translations(word: str, word_class: str, level: str) -> 
             "options": List[str] - 4 варианта в случайном порядке
         }
     """
-    prompt = f"""You are an English vocabulary test creator. Generate translation options for a multiple-choice quiz.
+    prompt = f"""Test creator. Word: {word} ({word_class}, {level.upper()})
 
-**Word Information:**
-- English word: {word}
-- Part of speech: {word_class}
-- CEFR Level: {level.upper()}
+Create JSON:
+{{"correct_translation": "most common Russian meaning", "wrong_translations": ["similar1", "similar2", "similar3"]}}
 
-**Example for "run":**
-{{
-    "correct_translation": "бежать, бегать",
-    "wrong_translations": ["ходить", "прыгать", "летать"]
-}}
+Requirements:
+✓ Correct: natural Russian, common meaning for level
+✓ Wrong: plausible, same part of speech, similar semantic field (not random)
 
-**Requirements for translations:**
-✓ Correct translation:
-- Most common meaning for this level
-- Use natural Russian
-- Can include 2 meanings if common (e.g. "бежать, работать" for run)
-
-✓ Wrong translations:
-- Should be plausible but incorrect
-- Same part of speech
-- Similar semantic field (e.g., other movement verbs)
-- Not random words - should make student think
-
-**Return ONLY valid JSON (no markdown):**
-{{
-    "correct_translation": "правильный перевод",
-    "wrong_translations": ["похожее неправильное 1", "похожее неправильное 2", "похожее неправильное 3"]
-}}
-"""
+JSON only, no markdown."""
 
     try:
         response = client.models.generate_content(
