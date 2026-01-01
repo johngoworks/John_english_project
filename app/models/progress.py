@@ -31,5 +31,8 @@ class UserVocabularyProgress(Base):
     word_id: Mapped[int] = mapped_column(Integer, ForeignKey('dictionary.id'), nullable=False, index=True)
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
+    correct_count: Mapped[int] = mapped_column(Integer, default=0)  # Количество правильных ответов подряд
     last_review: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     next_review: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    interval: Mapped[int] = mapped_column(Integer, default=1)  # Интервал повторения в днях
+    ease_factor: Mapped[float] = mapped_column(Integer, default=2.5)  # Фактор легкости (Anki)

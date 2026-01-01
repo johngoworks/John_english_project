@@ -239,6 +239,70 @@ async def chat_progress_check(user_id: int, level: str, completed_rules: List[st
         return f"Ошибка при генерации вопросов: {str(e)}"
 
 
+async def generate_word_examples(word: str, word_class: str, level: str) -> Dict:
+    """
+    Генерирует примеры использования слова и объяснение
+
+    Args:
+        word: Английское слово
+        word_class: Часть речи
+        level: Уровень слова
+
+    Returns:
+        dict: {
+            "explanation": str - объяснение слова на русском,
+            "examples": List[str] - 3-4 примера использования
+        }
+    """
+    prompt = f"""
+Ты - преподаватель английского языка. Создай объяснение и примеры для слова.
+
+Слово: {word}
+Часть речи: {word_class}
+Уровень: {level.upper()}
+
+Верни ответ ТОЛЬКО в виде JSON:
+{{
+    "explanation": "краткое объяснение значения слова на русском (1-2 предложения)",
+    "examples": [
+        "Example sentence 1 with this word.",
+        "Example sentence 2 showing different usage.",
+        "Example sentence 3 in context."
+    ]
+}}
+
+Требования:
+- Объяснение должно быть простым и понятным на русском
+- Примеры должны быть на английском с разными контекстами использования
+- Примеры соответствуют уровню {level.upper()}
+- Не добавляй никакого текста кроме JSON
+"""
+
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=prompt
+        )
+        result_text = response.text.strip()
+
+        # Clean JSON response
+        if result_text.startswith("```json"):
+            result_text = result_text[7:]
+        if result_text.startswith("```"):
+            result_text = result_text[3:]
+        if result_text.endswith("```"):
+            result_text = result_text[:-3]
+        result_text = result_text.strip()
+
+        result = json.loads(result_text)
+        return result
+    except Exception as e:
+        return {
+            "explanation": "Не удалось загрузить объяснение",
+            "examples": []
+        }
+
+
 async def generate_word_translations(word: str, word_class: str, level: str) -> Dict:
     """
     Генерирует варианты перевода слова (1 правильный + 3 неправильных)

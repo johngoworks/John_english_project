@@ -7,7 +7,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.models.dictionary import Dictionary
-from app.services import auth_service, gemini_service, progress_service
+from app.services import auth_service, gemini_service, progress_service, vocabulary_service
 
 router = APIRouter(prefix="/vocabulary", tags=["vocabulary"])
 templates = Jinja2Templates(directory="app/templates")
@@ -92,6 +92,47 @@ async def vocabulary_list(
     )
 
 
+@router.get("/{word_id}", response_class=HTMLResponse)
+async def word_detail(
+    request: Request,
+    word_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Детальная страница слова с AI примерами"""
+    token = request.cookies.get("access_token")
+    if not token:
+        return {"error": "Not authenticated"}
+
+    user = await auth_service.get_current_user_from_token(token, db)
+    if not user:
+        return {"error": "Not authenticated"}
+
+    # Get word
+    result = await db.execute(select(Dictionary).where(Dictionary.id == word_id))
+    word = result.scalar_one_or_none()
+
+    if not word:
+        return {"error": "Word not found"}
+
+    # Generate AI examples and explanation
+    ai_content = await gemini_service.generate_word_examples(
+        word.word,
+        word.class_ or "unknown",
+        word.level
+    )
+
+    return templates.TemplateResponse(
+        "vocabulary/detail.html",
+        {
+            "request": request,
+            "word": word,
+            "ai_examples": ai_content.get("examples", []),
+            "ai_explanation": ai_content.get("explanation", ""),
+            "user": user
+        }
+    )
+
+
 @router.get("/practice", response_class=HTMLResponse)
 async def practice_start(
     request: Request,
@@ -123,7 +164,7 @@ async def practice_card(
     level: str = Form(...),
     db: AsyncSession = Depends(get_db)
 ):
-    """Получение карточки со словом и вариантами перевода"""
+    """Получение карточки со словом и вариантами перевода (с Anki prefetch)"""
     token = request.cookies.get("access_token")
     if not token:
         return {"error": "Not authenticated"}
@@ -132,16 +173,18 @@ async def practice_card(
     if not user:
         return {"error": "Not authenticated"}
 
-    # Get random word from level
-    query = select(Dictionary).where(Dictionary.level == level.lower()).order_by(func.random()).limit(1)
-    result = await db.execute(query)
-    word = result.scalar_one_or_none()
+    # Get next 10 words using Anki algorithm
+    words = await vocabulary_service.get_practice_words(db, user.id, level, count=10)
 
-    if not word:
+    if not words:
         return templates.TemplateResponse(
             "vocabulary/no_words.html",
             {"request": request, "level": level}
         )
+
+    # Take first word from the queue
+    word = words[0]
+    remaining_count = len(words) - 1
 
     # Generate translation options using Gemini
     translations = await gemini_service.generate_word_translations(
@@ -157,7 +200,8 @@ async def practice_card(
             "word": word,
             "options": translations["options"],
             "correct_translation": translations["correct_translation"],
-            "level": level
+            "level": level,
+            "remaining_in_queue": remaining_count
         }
     )
 
@@ -171,7 +215,7 @@ async def practice_answer(
     level: str = Form(...),
     db: AsyncSession = Depends(get_db)
 ):
-    """Проверка ответа на карточку"""
+    """Проверка ответа на карточку с обновлением Anki прогресса"""
     token = request.cookies.get("access_token")
     if not token:
         return {"error": "Not authenticated"}
@@ -186,9 +230,8 @@ async def practice_answer(
 
     is_correct = selected_answer == correct_answer
 
-    # Update progress
-    if is_correct:
-        await progress_service.mark_word_completed(db, user.id, word_id)
+    # Update progress using Anki algorithm
+    await vocabulary_service.update_word_progress(db, user.id, word_id, is_correct)
 
     return templates.TemplateResponse(
         "vocabulary/practice_result.html",
