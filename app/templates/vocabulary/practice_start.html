@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Практика слов - English Learning{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Практика слов</h1>
+        <p class="text-gray-600">Выучите новые слова с помощью карточек</p>
+    </div>
+
+    <!-- Level Selection -->
+    <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Выберите уровень</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" id="practice-container">
+            {% for lvl in ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'] %}
+            <button
+                hx-post="/vocabulary/practice/card"
+                hx-target="#practice-container"
+                hx-swap="outerHTML"
+                hx-vals='{"level": "{{ lvl }}"}'
+                class="bg-indigo-600 text-white p-6 rounded-lg hover:bg-indigo-700 transition font-bold text-2xl">
+                {{ lvl.upper() }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% for rule in grammar_rules %}
+<a href="/grammar/{{ rule.id }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+    <div class="flex justify-between items-start">
+        <div class="flex-1">
+            <h3 class="text-lg font-bold text-gray-900">{{ rule.guideword }}</h3>
+            <p class="text-gray-600 mt-1">{{ rule.can_do_statement }}</p>
+            <div class="mt-2 flex gap-2">
+                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">{{ rule.level }}</span>
+                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ rule.super_category }}</span>
+            </div>
+        </div>
+        <div class="text-indigo-600 ml-4">→</div>
+    </div>
+</a>
+{% endfor %}
+
+{% if has_more %}
+<div class="mt-6 text-center" id="load-more-container">
+    <button
+        hx-get="/grammar?offset={{ offset }}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+        hx-target="#grammar-list"
+        hx-swap="beforeend"
+        class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 font-medium">
+        Загрузить еще
+    </button>
+</div>
+{% endif %}

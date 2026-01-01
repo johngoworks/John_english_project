@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Grammar Rules - English Learning{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Грамматические правила</h1>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <form method="GET" class="flex gap-4">
+            <select name="level" class="px-4 py-2 border border-gray-300 rounded-md">
+                <option value="">Все уровни</option>
+                {% for lvl in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
+                <option value="{{ lvl }}" {% if selected_level == lvl %}selected{% endif %}>{{ lvl }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                Фильтровать
+            </button>
+        </form>
+    </div>
+
+    <!-- Grammar Rules List -->
+    <div class="grid grid-cols-1 gap-4" id="grammar-list">
+        {% for rule in grammar_rules %}
+        <a href="/grammar/{{ rule.id }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-gray-900">{{ rule.guideword }}</h3>
+                    <p class="text-gray-600 mt-1">{{ rule.can_do_statement }}</p>
+                    <div class="mt-2 flex gap-2">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">{{ rule.level }}</span>
+                        <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ rule.super_category }}</span>
+                    </div>
+                </div>
+                <div class="text-indigo-600 ml-4">→</div>
+            </div>
+        </a>
+        {% endfor %}
+
+        {% if has_more %}
+        <div class="mt-6 text-center" id="load-more-container">
+            <button
+                hx-get="/grammar?offset={{ offset }}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                hx-target="#grammar-list"
+                hx-swap="beforeend"
+                class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 font-medium">
+                Загрузить еще
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+<div class="bg-white rounded-lg shadow-lg p-6 sm:p-8" id="practice-container">
+    <!-- Result Display -->
+    <div class="text-center mb-6">
+        {% if is_correct %}
+        <div class="text-6xl mb-4 text-green-600">✓</div>
+        <h2 class="text-2xl font-bold text-green-600 mb-2">Правильно!</h2>
+        {% else %}
+        <div class="text-6xl mb-4 text-red-600">✗</div>
+        <h2 class="text-2xl font-bold text-red-600 mb-2">Неправильно</h2>
+        {% endif %}
+    </div>
+
+    <!-- Word Info -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+        <div class="text-center">
+            <div class="text-3xl font-bold text-gray-900 mb-2">{{ word.word }}</div>
+            <div class="text-sm text-gray-500 mb-2">{{ word.class_ }}</div>
+        </div>
+
+        <div class="mt-4 space-y-2">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Правильный ответ:</span>
+                <span class="font-bold text-green-600">{{ correct_answer }}</span>
+            </div>
+            {% if not is_correct %}
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Ваш ответ:</span>
+                <span class="font-bold text-red-600">{{ selected_answer }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Next Button -->
+    <button
+        hx-post="/vocabulary/practice/card"
+        hx-target="#practice-container"
+        hx-swap="outerHTML"
+        hx-vals='{"level": "{{ level }}"}'
+        class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold text-lg">
+        Следующее слово
+    </button>
+
+    <a href="/vocabulary/practice" class="block text-center mt-4 text-gray-600 hover:text-gray-900">
+        Вернуться к выбору уровня
+    </a>
+</div>

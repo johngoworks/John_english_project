@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Vocabulary - English Learning{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Словарь</h1>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <select name="level" class="px-4 py-2 border border-gray-300 rounded-md text-sm">
+                <option value="">Все уровни</option>
+                {% for lvl in ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'] %}
+                <option value="{{ lvl }}" {% if selected_level == lvl %}selected{% endif %}>{{ lvl.upper() }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="word_class" class="px-4 py-2 border border-gray-300 rounded-md text-sm">
+                <option value="">Все части речи</option>
+                {% for wc in word_classes %}
+                <option value="{{ wc }}" {% if selected_class == wc %}selected{% endif %}>{{ wc }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium">
+                Фильтровать
+            </button>
+        </form>
+    </div>
+
+    <!-- Word Cards Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4" id="vocabulary-list">
+        {% for word in words %}
+        <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div class="font-bold text-base sm:text-lg text-gray-900 mb-1 break-words">{{ word.word }}</div>
+            <div class="text-xs sm:text-sm text-gray-600 mb-2">{{ word.class_ }}</div>
+            <span class="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">{{ word.level.upper() }}</span>
+        </div>
+        {% endfor %}
+
+        {% if has_more %}
+        <div class="col-span-full mt-6 text-center" id="load-more-vocab-container">
+            <button
+                hx-get="/vocabulary?offset={{ offset }}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_class %}&word_class={{ selected_class }}{% endif %}"
+                hx-target="#vocabulary-list"
+                hx-swap="beforeend"
+                class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 font-medium">
+                Загрузить еще
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if not words %}
+    <div class="text-center py-12 text-gray-500">
+        Слова не найдены. Попробуйте изменить фильтры.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+<div class="bg-white rounded-lg shadow-lg p-6 sm:p-8" id="practice-container">
+    <!-- Word Display -->
+    <div class="text-center mb-8">
+        <div class="text-sm text-gray-500 mb-2">{{ word.class_ }}</div>
+        <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">{{ word.word }}</h2>
+        <div class="inline-block bg-indigo-100 text-indigo-800 text-sm px-3 py-1 rounded-full">{{ word.level.upper() }}</div>
+    </div>
+
+    <!-- Translation Options -->
+    <form
+        hx-post="/vocabulary/practice/answer"
+        hx-target="#practice-container"
+        hx-swap="outerHTML">
+
+        <input type="hidden" name="word_id" value="{{ word.id }}">
+        <input type="hidden" name="correct_answer" value="{{ correct_translation }}">
+        <input type="hidden" name="level" value="{{ level }}">
+
+        <div class="space-y-3">
+            {% for option in options %}
+            <label class="block">
+                <input type="radio" name="selected_answer" value="{{ option }}" class="sr-only" required>
+                <div class="cursor-pointer border-2 border-gray-300 rounded-lg p-4 hover:border-indigo-500 hover:bg-indigo-50 transition text-center option-button">
+                    <span class="text-lg font-medium text-gray-900">{{ option }}</span>
+                </div>
+            </label>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="mt-6 w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 font-bold text-lg">
+            Проверить
+        </button>
+    </form>
+</div>
+
+<style>
+    input[type="radio"]:checked + .option-button {
+        border-color: #4f46e5;
+        background-color: #eef2ff;
+    }
+</style>

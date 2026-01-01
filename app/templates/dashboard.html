@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - English Learning{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Section -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Привет, {{ user.username }}!</h1>
+        <p class="text-gray-600">Ваш текущий уровень: <span class="font-bold text-indigo-600">{{ user.current_level }}</span></p>
+    </div>
+
+    <!-- Level Selection -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Выберите уровень для изучения</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {% for level in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
+            <a href="/tests/start?level={{ level }}" class="text-center p-6 border-2 border-gray-200 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition {% if level == user.current_level %}bg-indigo-100 border-indigo-600{% endif %}">
+                <div class="text-3xl font-bold text-gray-900">{{ level }}</div>
+                {% if level == user.current_level %}
+                <div class="text-sm text-indigo-600 font-semibold mt-2">Текущий</div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Grammar -->
+        <a href="/grammar" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Грамматика</h3>
+            <p class="text-sm sm:text-base text-gray-600">Изучайте правила с AI</p>
+        </a>
+
+        <!-- Vocabulary -->
+        <a href="/vocabulary" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Словарь</h3>
+            <p class="text-sm sm:text-base text-gray-600">Учите новые слова</p>
+        </a>
+
+        <!-- Tests -->
+        <a href="/tests/start" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Тесты</h3>
+            <p class="text-sm sm:text-base text-gray-600">Проверьте знания</p>
+        </a>
+
+        <!-- Progress -->
+        <a href="/progress" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Прогресс</h3>
+            <p class="text-sm sm:text-base text-gray-600">Ваша статистика</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

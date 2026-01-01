@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Test Result - English Learning{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Result Card -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        {% if result.is_correct %}
+        <div class="text-center mb-6">
+            <div class="text-6xl mb-4 text-green-600">✓</div>
+            <h1 class="text-3xl font-bold text-green-600">Правильно!</h1>
+        </div>
+        {% else %}
+        <div class="text-center mb-6">
+            <div class="text-6xl mb-4 text-red-600">✗</div>
+            <h1 class="text-3xl font-bold text-red-600">Неправильно</h1>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h3 class="font-semibold text-gray-900 mb-2">Правильный ответ:</h3>
+            <p class="text-lg text-gray-900">{{ result.correct_answer }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Progress Info -->
+        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <h3 class="font-semibold text-gray-900 mb-2">Ваш прогресс:</h3>
+            <p class="text-gray-700">
+                Попыток: {{ result.progress.total_attempts }} |
+                Правильных: {{ result.progress.correct_attempts }}
+                {% if result.progress.completed %}
+                <span class="text-green-600 font-semibold ml-2">✓ Правило освоено!</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if not result.is_correct and result.ai_explanation %}
+    <!-- AI Feedback -->
+    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="text-2xl sm:text-3xl mr-3 font-bold text-indigo-600">AI</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Объяснение от AI</h2>
+        </div>
+        <div class="markdown-content text-gray-900 text-sm sm:text-base">{{ result.ai_explanation }}</div>
+    </div>
+
+    <!-- Related Rules -->
+    {% if result.related_rules %}
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Связанные правила</h2>
+        <div class="space-y-2">
+            {% for rule in result.related_rules %}
+            <a href="/grammar/{{ rule.id }}"
+               class="block p-4 border border-gray-200 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition">
+                <span class="font-semibold">{{ rule.guideword }}</span>
+                <span class="text-sm text-gray-600 ml-2">({{ rule.level }})</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="flex gap-4">
+        <a href="/tests/question?level={{ level }}"
+           class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-semibold">
+            Следующий вопрос
+        </a>
+        <a href="/grammar/{{ grammar_id }}"
+           class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold">
+            Изучить правило
+        </a>
+        <a href="/dashboard"
+           class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold">
+            На главную
+        </a>
+    </div>
+</div>
+{% endblock %}

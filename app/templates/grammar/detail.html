@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ grammar.guideword }} - Grammar{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Back button -->
+    <a href="/grammar" class="text-indigo-600 hover:text-indigo-800 mb-4 inline-block">← Назад к списку</a>
+
+    <!-- Grammar Rule Card -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <div class="flex justify-between items-start mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">{{ grammar.guideword }}</h1>
+            <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-semibold">{{ grammar.level }}</span>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Категория</h3>
+            <p class="text-gray-900">{{ grammar.super_category }} → {{ grammar.sub_category }}</p>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Can-Do Statement</h3>
+            <p class="text-gray-900">{{ grammar.can_do_statement }}</p>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Примеры</h3>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-gray-900 whitespace-pre-line">{{ grammar.example }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Explanation -->
+    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="text-2xl sm:text-3xl mr-3 font-bold text-indigo-600">AI</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Объяснение от AI</h2>
+        </div>
+        <div class="markdown-content text-gray-900 text-sm sm:text-base">{{ ai_explanation }}</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-4">
+        <button
+            hx-post="/grammar/{{ grammar.id }}/complete"
+            hx-swap="outerHTML"
+            class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold">
+            ✓ Отметить как изученное
+        </button>
+        <a href="/tests/question?level={{ grammar.level }}"
+           class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 font-semibold">
+            Пройти тест по этому правилу
+        </a>
+    </div>
+</div>
+{% endblock %}
