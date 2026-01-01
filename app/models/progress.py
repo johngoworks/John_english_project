@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import String, Integer, Float, Boolean, DateTime, ForeignKey, UniqueConstraint
 from datetime import datetime
 from typing import Optional
 from app.database import Base
@@ -35,4 +35,4 @@ class UserVocabularyProgress(Base):
     last_review: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     next_review: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     interval: Mapped[int] = mapped_column(Integer, default=1)  # Интервал повторения в днях
-    ease_factor: Mapped[float] = mapped_column(Integer, default=2.5)  # Фактор легкости (Anki)
+    ease_factor: Mapped[float] = mapped_column(Float, default=2.5)  # Фактор легкости (Anki)
