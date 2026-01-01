@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
     # Groq AI
     GROQ_API_KEY: str
-    GROQ_MODEL: str = "qwen/qwen3-32b"
+    GROQ_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
     # Redis (optional for caching)
     REDIS_URL: str = "redis://localhost:6379"

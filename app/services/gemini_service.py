@@ -99,7 +99,8 @@ Respond with this exact JSON structure:
             model=settings.GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=500
+            max_tokens=500,
+            response_format={"type": "json_object"}
         )
         result_text = response.choices[0].message.content.strip()
 
@@ -272,7 +273,8 @@ Respond with this exact JSON structure:
             model=settings.GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.4,
-            max_tokens=500
+            max_tokens=500,
+            response_format={"type": "json_object"}
         )
         result_text = response.choices[0].message.content.strip()
 
@@ -334,7 +336,8 @@ Respond with this exact JSON structure:
             model=settings.GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=300
+            max_tokens=300,
+            response_format={"type": "json_object"}
         )
         result_text = response.choices[0].message.content.strip()
 
