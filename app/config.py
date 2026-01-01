@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     # Progress thresholds
     GRAMMAR_COMPLETION_THRESHOLD: int = 80  # %
     VOCAB_COMPLETION_THRESHOLD: int = 80  # %
-    REQUIRED_CORRECT_ATTEMPTS: int = 3  # To mark grammar as completed
+    REQUIRED_CORRECT_ATTEMPTS: int = 1  # To mark grammar as completed
 
     class Config:
         env_file = ".env"

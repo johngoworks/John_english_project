@@ -161,8 +161,10 @@ async def update_word_progress(
         # Update ease factor (make easier)
         progress.ease_factor = min(2.5, progress.ease_factor + 0.1)
 
-        # Mark as completed after 3 correct answers
-        if progress.correct_count >= 3:
+        # Mark as completed after reaching threshold
+        from app.config import get_settings
+        settings = get_settings()
+        if progress.correct_count >= settings.REQUIRED_CORRECT_ATTEMPTS:
             progress.completed = True
 
     else:
