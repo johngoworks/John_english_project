@@ -92,47 +92,6 @@ async def vocabulary_list(
     )
 
 
-@router.get("/{word_id}", response_class=HTMLResponse)
-async def word_detail(
-    request: Request,
-    word_id: int,
-    db: AsyncSession = Depends(get_db)
-):
-    """Детальная страница слова с AI примерами"""
-    token = request.cookies.get("access_token")
-    if not token:
-        return {"error": "Not authenticated"}
-
-    user = await auth_service.get_current_user_from_token(token, db)
-    if not user:
-        return {"error": "Not authenticated"}
-
-    # Get word
-    result = await db.execute(select(Dictionary).where(Dictionary.id == word_id))
-    word = result.scalar_one_or_none()
-
-    if not word:
-        return {"error": "Word not found"}
-
-    # Generate AI examples and explanation
-    ai_content = await gemini_service.generate_word_examples(
-        word.word,
-        word.class_ or "unknown",
-        word.level
-    )
-
-    return templates.TemplateResponse(
-        "vocabulary/detail.html",
-        {
-            "request": request,
-            "word": word,
-            "ai_examples": ai_content.get("examples", []),
-            "ai_explanation": ai_content.get("explanation", ""),
-            "user": user
-        }
-    )
-
-
 @router.get("/practice", response_class=HTMLResponse)
 async def practice_start(
     request: Request,
@@ -242,5 +201,46 @@ async def practice_answer(
             "correct_answer": correct_answer,
             "is_correct": is_correct,
             "level": level
+        }
+    )
+
+
+@router.get("/{word_id}", response_class=HTMLResponse)
+async def word_detail(
+    request: Request,
+    word_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Детальная страница слова с AI примерами"""
+    token = request.cookies.get("access_token")
+    if not token:
+        return {"error": "Not authenticated"}
+
+    user = await auth_service.get_current_user_from_token(token, db)
+    if not user:
+        return {"error": "Not authenticated"}
+
+    # Get word
+    result = await db.execute(select(Dictionary).where(Dictionary.id == word_id))
+    word = result.scalar_one_or_none()
+
+    if not word:
+        return {"error": "Word not found"}
+
+    # Generate AI examples and explanation
+    ai_content = await gemini_service.generate_word_examples(
+        word.word,
+        word.class_ or "unknown",
+        word.level
+    )
+
+    return templates.TemplateResponse(
+        "vocabulary/detail.html",
+        {
+            "request": request,
+            "word": word,
+            "ai_examples": ai_content.get("examples", []),
+            "ai_explanation": ai_content.get("explanation", ""),
+            "user": user
         }
     )
