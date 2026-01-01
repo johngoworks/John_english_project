@@ -36,7 +36,9 @@ Use markdown (##, **). Conversational Russian."""
     try:
         response = client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5,
+            max_tokens=800
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -59,48 +61,45 @@ async def generate_test(grammar_rule: Grammar, question_type: str = "multiple_ch
         }
     """
     if question_type == "multiple_choice":
-        prompt = f"""Create multiple-choice test. JSON only.
+        prompt = f"""You must respond with ONLY valid JSON, no explanations.
 
-Rule: {grammar_rule.guideword} ({grammar_rule.level})
-Examples: {grammar_rule.example[:200]}
+Grammar rule: {grammar_rule.guideword}
+Level: {grammar_rule.level}
+Example: {grammar_rule.example[:200]}
 
-Requirements:
-- Complete sentence with blank/choice
-- 4 plausible options (1 correct)
-- Tests specific rule understanding
+Create a multiple-choice question testing this grammar rule.
 
-JSON format:
-{{"question": "sentence here", "options": ["A","B","C","D"], "correct_answer": "exact match"}}"""
+Respond with this exact JSON structure:
+{{"question": "Complete sentence here", "options": ["option1", "option2", "option3", "option4"], "correct_answer": "option1"}}"""
 
     elif question_type == "fill_blank":
-        prompt = f"""Create fill-blank test. JSON only.
+        prompt = f"""You must respond with ONLY valid JSON, no explanations.
 
-Rule: {grammar_rule.guideword} ({grammar_rule.level})
+Grammar rule: {grammar_rule.guideword}
+Level: {grammar_rule.level}
 
-Requirements:
-- Use ___ for blank
-- 1-3 word answer
-- Level-appropriate
+Create a fill-in-the-blank question. Use ___ for the blank.
 
-JSON format:
-{{"question": "sentence with ___", "correct_answer": "answer"}}"""
+Respond with this exact JSON structure:
+{{"question": "Sentence with ___ blank", "correct_answer": "answer"}}"""
 
     else:  # open_ended
-        prompt = f"""Create open-ended test. JSON only.
+        prompt = f"""You must respond with ONLY valid JSON, no explanations.
 
-Rule: {grammar_rule.guideword} ({grammar_rule.level})
+Grammar rule: {grammar_rule.guideword}
+Level: {grammar_rule.level}
 
-Requirements:
-- Creative use of rule
-- 1-2 sentences expected
+Create an open-ended question testing this grammar rule.
 
-JSON format:
-{{"question": "instruction", "correct_answer": "example answer"}}"""
+Respond with this exact JSON structure:
+{{"question": "instruction here", "correct_answer": "example answer"}}"""
 
     try:
         response = client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=500
         )
         result_text = response.choices[0].message.content.strip()
 
@@ -116,6 +115,12 @@ JSON format:
         result = json.loads(result_text)
         result["question_type"] = question_type
         return result
+    except json.JSONDecodeError as e:
+        return {
+            "question": f"Error: Invalid JSON from AI. Please try again.",
+            "correct_answer": "",
+            "question_type": question_type
+        }
     except Exception as e:
         return {
             "question": f"Error generating question: {str(e)}",
@@ -170,7 +175,9 @@ Tone: kind, simple Russian, markdown formatting."""
     try:
         response = client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5,
+            max_tokens=800
         )
         explanation = response.choices[0].message.content
 
@@ -225,7 +232,9 @@ Format:
     try:
         response = client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5,
+            max_tokens=600
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -247,21 +256,23 @@ async def generate_word_examples(word: str, word_class: str, level: str) -> Dict
             "examples": List[str] - 3-4 примера использования
         }
     """
-    prompt = f"""Vocabulary teacher. Word: {word} ({word_class}, {level.upper()})
+    prompt = f"""You must respond with ONLY valid JSON, no explanations or markdown.
 
-Create JSON:
-{{"explanation": "Russian meaning 1-2 sentences", "examples": ["sentence1", "sentence2", "sentence3"]}}
+Word: {word}
+Part of speech: {word_class}
+Level: {level.upper()}
 
-Requirements:
-- Explanation: Russian, mention multiple meanings if any
-- Examples: English, different contexts, {level.upper()}-appropriate, practical usage
+Task: Create explanation in Russian and 3 example sentences in English.
 
-JSON only, no markdown."""
+Respond with this exact JSON structure:
+{{"explanation": "Краткое объяснение на русском (1-2 предложения)", "examples": ["First English example sentence", "Second English example sentence", "Third English example sentence"]}}"""
 
     try:
         response = client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.4,
+            max_tokens=500
         )
         result_text = response.choices[0].message.content.strip()
 
@@ -275,11 +286,20 @@ JSON only, no markdown."""
         result_text = result_text.strip()
 
         result = json.loads(result_text)
+
+        # Validate structure
+        if "explanation" not in result or "examples" not in result:
+            raise ValueError("Missing required fields")
+
         return result
     except Exception as e:
         return {
-            "explanation": "Не удалось загрузить объяснение",
-            "examples": []
+            "explanation": f"Слово: {word} ({word_class})",
+            "examples": [
+                f"I need to learn the word '{word}'.",
+                f"The word '{word}' is important.",
+                f"Can you use '{word}' in a sentence?"
+            ]
         }
 
 
@@ -298,21 +318,23 @@ async def generate_word_translations(word: str, word_class: str, level: str) -> 
             "options": List[str] - 4 варианта в случайном порядке
         }
     """
-    prompt = f"""Test creator. Word: {word} ({word_class}, {level.upper()})
+    prompt = f"""You must respond with ONLY valid JSON, no explanations or markdown.
 
-Create JSON:
-{{"correct_translation": "most common Russian meaning", "wrong_translations": ["similar1", "similar2", "similar3"]}}
+English word: {word}
+Part of speech: {word_class}
+Level: {level.upper()}
 
-Requirements:
-✓ Correct: natural Russian, common meaning for level
-✓ Wrong: plausible, same part of speech, similar semantic field (not random)
+Task: Provide 1 correct Russian translation and 3 plausible wrong translations (same part of speech, similar meaning but incorrect).
 
-JSON only, no markdown."""
+Respond with this exact JSON structure:
+{{"correct_translation": "правильный перевод", "wrong_translations": ["неправильный1", "неправильный2", "неправильный3"]}}"""
 
     try:
         response = client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=300
         )
         result_text = response.choices[0].message.content.strip()
 
@@ -327,9 +349,16 @@ JSON only, no markdown."""
 
         result = json.loads(result_text)
 
+        # Validate structure
+        if "correct_translation" not in result or "wrong_translations" not in result:
+            raise ValueError("Missing required fields")
+
+        if len(result["wrong_translations"]) < 3:
+            raise ValueError("Not enough wrong translations")
+
         # Combine and shuffle options
         import random
-        options = [result["correct_translation"]] + result["wrong_translations"]
+        options = [result["correct_translation"]] + result["wrong_translations"][:3]
         random.shuffle(options)
 
         return {
@@ -337,8 +366,12 @@ JSON only, no markdown."""
             "options": options
         }
     except Exception as e:
-        # Fallback in case of error
+        # Fallback with generic translations
+        import random
+        generic_wrong = ["значение", "смысл", "понятие", "термин", "выражение", "слово"]
+        random.shuffle(generic_wrong)
+
         return {
-            "correct_translation": "перевод",
-            "options": ["перевод", "вариант 1", "вариант 2", "вариант 3"]
+            "correct_translation": f"[{word}]",
+            "options": [f"[{word}]"] + generic_wrong[:3]
         }
