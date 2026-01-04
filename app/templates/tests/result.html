@@ -64,17 +64,17 @@
     {% endif %}
 
     <!-- Actions -->
-    <div class="flex gap-4">
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <a href="/tests/question?level={{ level }}"
-           class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-semibold">
+           class="w-full sm:w-auto bg-indigo-600 text-white px-4 sm:px-8 py-3 rounded-lg hover:bg-indigo-700 font-semibold text-center">
             Следующий вопрос
         </a>
         <a href="/grammar/{{ grammar_id }}"
-           class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold">
+           class="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 sm:px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold text-center">
             Изучить правило
         </a>
         <a href="/dashboard"
-           class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold">
+           class="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 sm:px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold text-center">
             На главную
         </a>
     </div>
