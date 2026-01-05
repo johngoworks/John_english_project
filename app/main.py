@@ -12,7 +12,7 @@ from app.services import auth_service
 from datetime import timedelta
 
 # Import routers
-from app.routes import pages, auth, grammar, tests, progress, vocabulary
+from app.routes import pages, auth, grammar, tests, progress, vocabulary, tenses
 
 settings = get_settings()
 
@@ -42,6 +42,7 @@ templates = Jinja2Templates(directory="app/templates")
 app.include_router(pages.router)  # Main pages (dashboard, home, login, register)
 app.include_router(auth.router)   # Auth form handlers
 app.include_router(grammar.router)  # Grammar routes
+app.include_router(tenses.router)  # Tenses routes
 app.include_router(vocabulary.router)  # Vocabulary routes
 app.include_router(tests.router)  # Test routes
 app.include_router(progress.router)  # Progress routes

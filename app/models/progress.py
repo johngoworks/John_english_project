@@ -36,3 +36,18 @@ class UserVocabularyProgress(Base):
     next_review: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     interval: Mapped[int] = mapped_column(Integer, default=1)  # Интервал повторения в днях
     ease_factor: Mapped[float] = mapped_column(Float, default=2.5)  # Фактор легкости (Anki)
+
+
+class UserTenseProgress(Base):
+    __tablename__ = 'user_tense_progress'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'tense_id', name='uix_user_tense'),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    tense_id: Mapped[int] = mapped_column(Integer, ForeignKey('tenses.id'), nullable=False, index=True)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    total_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    correct_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    last_attempt: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

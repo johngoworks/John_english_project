@@ -1,0 +1,31 @@
+{% for tense in tenses %}
+<a href="/tenses/{{ tense.id }}"
+   class="block bg-white rounded-lg shadow-md hover:shadow-lg transition p-4 sm:p-6">
+    <div class="flex justify-between items-start mb-2">
+        <h3 class="text-lg sm:text-xl font-bold text-gray-900">{{ tense.tense_name }}</h3>
+        <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-semibold">{{ tense.level }}</span>
+    </div>
+
+    <p class="text-sm text-gray-600 mb-2">
+        <span class="font-semibold">{{ tense.category }}</span>
+    </p>
+
+    <p class="text-sm text-gray-700 mb-3 line-clamp-2">{{ tense.usage }}</p>
+
+    <div class="text-xs text-gray-500">
+        <strong>Маркеры:</strong> {{ tense.time_markers[:50] }}...
+    </div>
+</a>
+{% endfor %}
+
+{% if has_more %}
+<div class="col-span-full text-center">
+    <button
+        hx-get="/tenses?offset={{ offset }}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+        hx-target="#tenses-container"
+        hx-swap="beforeend"
+        class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 font-semibold">
+        Загрузить ещё
+    </button>
+</div>
+{% endif %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tense.tense_name }} - English Learning{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <a href="/tenses" class="text-indigo-600 hover:text-indigo-800 text-sm">&larr; Назад к списку</a>
+        <div class="flex justify-between items-start mt-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ tense.tense_name }}</h1>
+            <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ tense.level }}
+            </span>
+        </div>
+        <p class="text-gray-600 mt-2">{{ tense.category }}</p>
+    </div>
+
+    <!-- Forms -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Формы</h2>
+
+        <div class="space-y-4">
+            <div>
+                <h3 class="font-semibold text-gray-700">✓ Утвердительная</h3>
+                <p class="text-gray-900 bg-green-50 p-3 rounded mt-1">{{ tense.form_positive }}</p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold text-gray-700">✗ Отрицательная</h3>
+                <p class="text-gray-900 bg-red-50 p-3 rounded mt-1">{{ tense.form_negative }}</p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold text-gray-700">? Вопросительная</h3>
+                <p class="text-gray-900 bg-blue-50 p-3 rounded mt-1">{{ tense.form_question }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Использование</h2>
+        <p class="text-gray-900 leading-relaxed">{{ tense.usage }}</p>
+    </div>
+
+    <!-- Examples -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Примеры</h2>
+        {% for example in tense.examples.split('. ') %}
+            {% if example.strip() %}
+            <p class="text-gray-900 bg-gray-50 p-3 rounded mb-2">{{ example.strip() }}.</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Time Markers -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Временные маркеры</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for marker in tense.time_markers.split(', ') %}
+            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ marker.strip() }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- AI Explanation -->
+    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <div class="flex items-center mb-4">
+            <div class="text-2xl sm:text-3xl mr-3 font-bold text-indigo-600">AI</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Объяснение от AI</h2>
+        </div>
+        <div class="markdown-content text-gray-900 text-sm sm:text-base">{{ ai_explanation }}</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <button
+            hx-post="/tenses/{{ tense.id }}/complete"
+            hx-swap="none"
+            class="w-full sm:w-auto bg-green-600 text-white px-4 sm:px-8 py-3 rounded-lg hover:bg-green-700 font-semibold text-center">
+            Отметить как изученное
+        </button>
+        <a href="/tenses"
+           class="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 sm:px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold text-center">
+            Вернуться к списку
+        </a>
+    </div>
+</div>
+{% endblock %}

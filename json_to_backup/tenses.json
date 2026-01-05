@@ -1,0 +1,178 @@
+[
+  {
+    "tense_name": "Present Simple",
+    "level": "A1",
+    "category": "Present",
+    "form_positive": "I/You/We/They + verb, He/She/It + verb+s",
+    "form_negative": "I/You/We/They + don't + verb, He/She/It + doesn't + verb",
+    "form_question": "Do + I/you/we/they + verb? Does + he/she/it + verb?",
+    "usage": "Регулярные действия, факты, расписания",
+    "examples": "I work every day. She doesn't like coffee. Do you speak English?",
+    "time_markers": "always, usually, often, sometimes, never, every day/week/month"
+  },
+  {
+    "tense_name": "Present Continuous",
+    "level": "A1",
+    "category": "Present",
+    "form_positive": "I am/He is/We are + verb+ing",
+    "form_negative": "I am not/He isn't/We aren't + verb+ing",
+    "form_question": "Am I/Is he/Are we + verb+ing?",
+    "usage": "Действие происходит сейчас, временные ситуации, будущие планы",
+    "examples": "I am working now. She isn't sleeping. Are you watching TV?",
+    "time_markers": "now, at the moment, right now, today, this week"
+  },
+  {
+    "tense_name": "Present Perfect",
+    "level": "A2",
+    "category": "Present",
+    "form_positive": "I/You/We/They + have + verb(V3), He/She/It + has + verb(V3)",
+    "form_negative": "I/You/We/They + haven't + verb(V3), He/She/It + hasn't + verb(V3)",
+    "form_question": "Have + I/you/we/they + verb(V3)? Has + he/she/it + verb(V3)?",
+    "usage": "Результат в настоящем, опыт, действие началось в прошлом и продолжается",
+    "examples": "I have finished my homework. She has never been to Paris. Have you seen this film?",
+    "time_markers": "just, already, yet, ever, never, recently, lately, for, since"
+  },
+  {
+    "tense_name": "Present Perfect Continuous",
+    "level": "B1",
+    "category": "Present",
+    "form_positive": "I/You/We/They + have been + verb+ing, He/She/It + has been + verb+ing",
+    "form_negative": "I/You/We/They + haven't been + verb+ing, He/She/It + hasn't been + verb+ing",
+    "form_question": "Have + I/you/we/they + been + verb+ing? Has + he/she/it + been + verb+ing?",
+    "usage": "Длительное действие, которое началось в прошлом и продолжается/только закончилось",
+    "examples": "I have been studying English for 3 years. She has been working all day. How long have you been waiting?",
+    "time_markers": "for, since, all day/week, how long"
+  },
+  {
+    "tense_name": "Past Simple",
+    "level": "A1",
+    "category": "Past",
+    "form_positive": "I/You/He/She/It/We/They + verb(V2)",
+    "form_negative": "I/You/He/She/It/We/They + didn't + verb",
+    "form_question": "Did + I/you/he/she/it/we/they + verb?",
+    "usage": "Завершённое действие в прошлом, последовательность действий",
+    "examples": "I went to school yesterday. She didn't call me. Did you see him?",
+    "time_markers": "yesterday, ago, last week/month/year, in 2010"
+  },
+  {
+    "tense_name": "Past Continuous",
+    "level": "A2",
+    "category": "Past",
+    "form_positive": "I/He/She/It + was + verb+ing, You/We/They + were + verb+ing",
+    "form_negative": "I/He/She/It + wasn't + verb+ing, You/We/They + weren't + verb+ing",
+    "form_question": "Was + I/he/she/it + verb+ing? Were + you/we/they + verb+ing?",
+    "usage": "Длительное действие в определённый момент прошлого, фон для другого действия",
+    "examples": "I was reading when you called. They weren't playing football. What were you doing at 5 pm?",
+    "time_markers": "at 5 o'clock, when, while, all day yesterday"
+  },
+  {
+    "tense_name": "Past Perfect",
+    "level": "B1",
+    "category": "Past",
+    "form_positive": "I/You/He/She/It/We/They + had + verb(V3)",
+    "form_negative": "I/You/He/She/It/We/They + hadn't + verb(V3)",
+    "form_question": "Had + I/you/he/she/it/we/they + verb(V3)?",
+    "usage": "Действие, которое произошло раньше другого действия в прошлом",
+    "examples": "I had finished my homework before dinner. She hadn't seen him before. Had you met her before the party?",
+    "time_markers": "before, after, by the time, already, just"
+  },
+  {
+    "tense_name": "Past Perfect Continuous",
+    "level": "B2",
+    "category": "Past",
+    "form_positive": "I/You/He/She/It/We/They + had been + verb+ing",
+    "form_negative": "I/You/He/She/It/We/They + hadn't been + verb+ing",
+    "form_question": "Had + I/you/he/she/it/we/they + been + verb+ing?",
+    "usage": "Длительное действие до определённого момента в прошлом",
+    "examples": "I had been studying for 2 hours when she came. They hadn't been working long. How long had you been waiting?",
+    "time_markers": "for, since, before, how long"
+  },
+  {
+    "tense_name": "Future Simple (will)",
+    "level": "A2",
+    "category": "Future",
+    "form_positive": "I/You/He/She/It/We/They + will + verb",
+    "form_negative": "I/You/He/She/It/We/They + won't + verb",
+    "form_question": "Will + I/you/he/she/it/we/they + verb?",
+    "usage": "Предсказания, спонтанные решения, обещания",
+    "examples": "I will help you. It won't rain tomorrow. Will you come to the party?",
+    "time_markers": "tomorrow, next week/month/year, in the future"
+  },
+  {
+    "tense_name": "Future Simple (going to)",
+    "level": "A2",
+    "category": "Future",
+    "form_positive": "I am/He is/We are + going to + verb",
+    "form_negative": "I'm not/He isn't/We aren't + going to + verb",
+    "form_question": "Am I/Is he/Are we + going to + verb?",
+    "usage": "Планы, намерения, предсказания на основе очевидных фактов",
+    "examples": "I'm going to study medicine. Look at the clouds! It's going to rain. Are you going to watch the match?",
+    "time_markers": "tomorrow, next week, tonight, soon"
+  },
+  {
+    "tense_name": "Future Continuous",
+    "level": "B1",
+    "category": "Future",
+    "form_positive": "I/You/He/She/It/We/They + will be + verb+ing",
+    "form_negative": "I/You/He/She/It/We/They + won't be + verb+ing",
+    "form_question": "Will + I/you/he/she/it/we/they + be + verb+ing?",
+    "usage": "Действие, которое будет происходить в определённый момент в будущем",
+    "examples": "I will be working at 5 pm tomorrow. She won't be sleeping at midnight. Will you be using the car?",
+    "time_markers": "at this time tomorrow, at 5 pm, this time next week"
+  },
+  {
+    "tense_name": "Future Perfect",
+    "level": "B2",
+    "category": "Future",
+    "form_positive": "I/You/He/She/It/We/They + will have + verb(V3)",
+    "form_negative": "I/You/He/She/It/We/They + won't have + verb(V3)",
+    "form_question": "Will + I/you/he/she/it/we/they + have + verb(V3)?",
+    "usage": "Действие, которое завершится к определённому моменту в будущем",
+    "examples": "I will have finished by 6 pm. She won't have arrived by then. Will you have completed it by Monday?",
+    "time_markers": "by, by the time, by tomorrow, before"
+  },
+  {
+    "tense_name": "Future Perfect Continuous",
+    "level": "C1",
+    "category": "Future",
+    "form_positive": "I/You/He/She/It/We/They + will have been + verb+ing",
+    "form_negative": "I/You/He/She/It/We/They + won't have been + verb+ing",
+    "form_question": "Will + I/you/he/she/it/we/they + have been + verb+ing?",
+    "usage": "Длительность действия к определённому моменту в будущем",
+    "examples": "By next year, I will have been living here for 10 years. She won't have been working long. How long will you have been studying?",
+    "time_markers": "for, by, by the time, how long"
+  },
+  {
+    "tense_name": "Used to",
+    "level": "A2",
+    "category": "Past",
+    "form_positive": "I/You/He/She/It/We/They + used to + verb",
+    "form_negative": "I/You/He/She/It/We/They + didn't use to + verb",
+    "form_question": "Did + I/you/he/she/it/we/they + use to + verb?",
+    "usage": "Привычки и состояния в прошлом, которых больше нет",
+    "examples": "I used to play football. She didn't use to like vegetables. Did you use to live in London?",
+    "time_markers": "in the past, when I was young, years ago"
+  },
+  {
+    "tense_name": "Would (habitual past)",
+    "level": "B1",
+    "category": "Past",
+    "form_positive": "I/You/He/She/It/We/They + would + verb",
+    "form_negative": "I/You/He/She/It/We/They + wouldn't + verb",
+    "form_question": "Would + I/you/he/she/it/we/they + verb?",
+    "usage": "Повторяющиеся действия в прошлом (не состояния)",
+    "examples": "When I was young, I would visit my grandparents every summer. He would always help me. Would you often go there?",
+    "time_markers": "when I was young, in those days, often, always (in past context)"
+  },
+  {
+    "tense_name": "Mixed Conditionals",
+    "level": "C1",
+    "category": "Conditional",
+    "form_positive": "If + past perfect, would + verb / If + past simple, would have + verb(V3)",
+    "form_negative": "If + past perfect, wouldn't + verb / If + past simple, wouldn't have + verb(V3)",
+    "form_question": "Various question forms depending on context",
+    "usage": "Смешанные условные предложения: прошлое условие → настоящий результат или настоящее условие → прошлый результат",
+    "examples": "If I had studied harder, I would be a doctor now. If I were rich, I would have bought that house.",
+    "time_markers": "depends on context"
+  }
+]
