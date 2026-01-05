@@ -5,7 +5,8 @@ from typing import Dict
 from app.models.user import User
 from app.models.grammar import Grammar
 from app.models.dictionary import Dictionary
-from app.models.progress import UserGrammarProgress, UserVocabularyProgress
+from app.models.tense import Tense
+from app.models.progress import UserGrammarProgress, UserVocabularyProgress, UserTenseProgress
 from app.config import get_settings
 
 settings = get_settings()
@@ -56,9 +57,28 @@ async def get_level_progress(db: AsyncSession, user_id: int, level: str) -> Dict
     )
     completed_words = completed_words_result.scalar() or 0
 
+    # Total tenses for level
+    total_tenses_result = await db.execute(
+        select(func.count(Tense.id)).where(Tense.level == level.upper())
+    )
+    total_tenses = total_tenses_result.scalar() or 0
+
+    # Completed tenses for user
+    completed_tenses_result = await db.execute(
+        select(func.count(UserTenseProgress.id))
+        .join(Tense, Tense.id == UserTenseProgress.tense_id)
+        .where(
+            UserTenseProgress.user_id == user_id,
+            UserTenseProgress.completed == True,
+            Tense.level == level.upper()
+        )
+    )
+    completed_tenses = completed_tenses_result.scalar() or 0
+
     # Calculate percentages
     grammar_pct = (completed_grammar / total_grammar * 100) if total_grammar > 0 else 0
     vocab_pct = (completed_words / total_words * 100) if total_words > 0 else 0
+    tenses_pct = (completed_tenses / total_tenses * 100) if total_tenses > 0 else 0
 
     # Check if can advance
     can_advance = (
@@ -79,8 +99,11 @@ async def get_level_progress(db: AsyncSession, user_id: int, level: str) -> Dict
         "completed_grammar": completed_grammar,
         "total_words": total_words,
         "completed_words": completed_words,
+        "total_tenses": total_tenses,
+        "completed_tenses": completed_tenses,
         "grammar_completion_pct": round(grammar_pct, 1),
         "vocab_completion_pct": round(vocab_pct, 1),
+        "tenses_completion_pct": round(tenses_pct, 1),
         "can_advance": can_advance,
         "next_level": next_level
     }
@@ -129,6 +152,34 @@ async def mark_grammar_completed(
     await db.commit()
 
 
+async def mark_grammar_as_read(
+    db: AsyncSession,
+    user_id: int,
+    grammar_id: str
+) -> None:
+    """Отметить правило как прочитанное"""
+    from datetime import datetime
+
+    result = await db.execute(
+        select(UserGrammarProgress).where(
+            UserGrammarProgress.user_id == user_id,
+            UserGrammarProgress.grammar_id == grammar_id
+        )
+    )
+    progress = result.scalar_one_or_none()
+
+    if not progress:
+        progress = UserGrammarProgress(
+            user_id=user_id,
+            grammar_id=grammar_id
+        )
+        db.add(progress)
+
+    progress.is_read = not progress.is_read  # Toggle
+    progress.last_attempt = datetime.utcnow()  # Update timestamp for sorting
+    await db.commit()
+
+
 async def mark_word_completed(
     db: AsyncSession,
     user_id: int,
@@ -155,4 +206,32 @@ async def mark_word_completed(
         progress.attempts += 1
         progress.completed = True
 
+    await db.commit()
+
+
+async def mark_tense_as_read(
+    db: AsyncSession,
+    user_id: int,
+    tense_id: int
+) -> None:
+    """Отметить время как прочитанное"""
+    from datetime import datetime
+
+    result = await db.execute(
+        select(UserTenseProgress).where(
+            UserTenseProgress.user_id == user_id,
+            UserTenseProgress.tense_id == tense_id
+        )
+    )
+    progress = result.scalar_one_or_none()
+
+    if not progress:
+        progress = UserTenseProgress(
+            user_id=user_id,
+            tense_id=tense_id
+        )
+        db.add(progress)
+
+    progress.is_read = not progress.is_read  # Toggle
+    progress.last_attempt = datetime.utcnow()  # Update timestamp for sorting
     await db.commit()

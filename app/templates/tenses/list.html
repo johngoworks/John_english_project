@@ -14,12 +14,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Уровень</label>
                 <div class="flex flex-wrap gap-2">
                     <a href="/tenses{% if selected_category %}?category={{ selected_category }}{% endif %}"
-                       class="px-3 py-1 rounded-full text-sm font-semibold {% if not selected_level %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if not selected_level %}bg-purple-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
                         Все
                     </a>
                     {% for level in ["A1", "A2", "B1", "B2", "C1", "C2"] %}
                     <a href="/tenses?level={{ level }}{% if selected_category %}&category={{ selected_category }}{% endif %}"
-                       class="px-3 py-1 rounded-full text-sm font-semibold {% if selected_level == level %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if selected_level == level %}bg-purple-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
                         {{ level }}
                     </a>
                     {% endfor %}
@@ -31,12 +31,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Категория</label>
                 <div class="flex flex-wrap gap-2">
                     <a href="/tenses{% if selected_level %}?level={{ selected_level }}{% endif %}"
-                       class="px-3 py-1 rounded-full text-sm font-semibold {% if not selected_category %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if not selected_category %}bg-purple-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
                         Все
                     </a>
                     {% for cat in categories %}
                     <a href="/tenses?{% if selected_level %}level={{ selected_level }}&{% endif %}category={{ cat }}"
-                       class="px-3 py-1 rounded-full text-sm font-semibold {% if selected_category == cat %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if selected_category == cat %}bg-purple-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
                         {{ cat }}
                     </a>
                     {% endfor %}
@@ -44,6 +44,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Recently Read Tenses -->
+    {% if read_tenses %}
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <span class="text-yellow-500 text-2xl mr-2">⭐</span>
+                <span>Недавно прочитанные</span>
+            </h2>
+            <a href="/tenses/read/all" class="text-purple-600 hover:text-purple-800 font-semibold text-sm">
+                Смотреть все →
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for tense in read_tenses %}
+            <a href="/tenses/{{ tense.id }}" class="bg-yellow-50 border-2 border-yellow-200 rounded-lg shadow hover:shadow-lg transition p-4">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-yellow-500 text-sm">⭐</span>
+                            <h3 class="text-lg font-bold text-gray-900">{{ tense.tense_name }}</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm line-clamp-2">{{ tense.usage }}</p>
+                        <div class="mt-2 flex gap-2">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">{{ tense.level }}</span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ tense.category }}</span>
+                        </div>
+                    </div>
+                    <div class="text-yellow-600 ml-4">→</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Tenses List -->
     <div id="tenses-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">

@@ -15,6 +15,7 @@ class UserGrammarProgress(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     grammar_id: Mapped[str] = mapped_column(String, ForeignKey('grammar.id'), nullable=False, index=True)
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)  # Отметка "прочитано"
     total_attempts: Mapped[int] = mapped_column(Integer, default=0)
     correct_attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_attempt: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
@@ -48,6 +49,7 @@ class UserTenseProgress(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     tense_id: Mapped[int] = mapped_column(Integer, ForeignKey('tenses.id'), nullable=False, index=True)
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)  # Отметка "прочитано"
     total_attempts: Mapped[int] = mapped_column(Integer, default=0)
     correct_attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_attempt: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

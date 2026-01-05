@@ -8,48 +8,131 @@
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <form method="GET" class="flex gap-4">
-            <select name="level" class="px-4 py-2 border border-gray-300 rounded-md">
-                <option value="">Все уровни</option>
-                {% for lvl in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
-                <option value="{{ lvl }}" {% if selected_level == lvl %}selected{% endif %}>{{ lvl }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
-                Фильтровать
-            </button>
-        </form>
-    </div>
-
-    <!-- Grammar Rules List -->
-    <div class="grid grid-cols-1 gap-4" id="grammar-list">
-        {% for rule in grammar_rules %}
-        <a href="/grammar/{{ rule.id }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-            <div class="flex justify-between items-start">
-                <div class="flex-1">
-                    <h3 class="text-lg font-bold text-gray-900">{{ rule.guideword }}</h3>
-                    <p class="text-gray-600 mt-1">{{ rule.can_do_statement }}</p>
-                    <div class="mt-2 flex gap-2">
-                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">{{ rule.level }}</span>
-                        <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ rule.super_category }}</span>
-                    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Level Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Уровень</label>
+                <div class="flex flex-wrap gap-2">
+                    <a href="/grammar{% if selected_category %}?category={{ selected_category }}{% endif %}"
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if not selected_level %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        Все
+                    </a>
+                    {% for lvl in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
+                    <a href="/grammar?level={{ lvl }}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if selected_level == lvl %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        {{ lvl }}
+                    </a>
+                    {% endfor %}
                 </div>
-                <div class="text-indigo-600 ml-4">→</div>
             </div>
-        </a>
-        {% endfor %}
 
-        {% if has_more %}
-        <div class="mt-6 text-center" id="load-more-container">
-            <button
-                hx-get="/grammar?offset={{ offset }}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
-                hx-target="#grammar-list"
-                hx-swap="beforeend"
-                class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 font-medium">
-                Загрузить еще
-            </button>
+            <!-- Category Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Категория</label>
+                <div class="flex flex-wrap gap-2">
+                    <a href="/grammar{% if selected_level %}?level={{ selected_level }}{% endif %}"
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if not selected_category %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        Все
+                    </a>
+                    {% for cat in categories %}
+                    <a href="/grammar?{% if selected_level %}level={{ selected_level }}&{% endif %}category={{ cat }}"
+                       class="px-3 py-1 rounded-full text-sm font-semibold {% if selected_category == cat %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                        {{ cat }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        {% endif %}
     </div>
+
+    <!-- Recently Read Rules -->
+    {% if read_rules %}
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <span class="text-yellow-500 text-2xl mr-2">⭐</span>
+                <span>Недавно прочитанные</span>
+            </h2>
+            <a href="/grammar/read/all" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">
+                Смотреть все →
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for rule in read_rules %}
+            <a href="/grammar/{{ rule.id }}" class="bg-yellow-50 border-2 border-yellow-200 rounded-lg shadow hover:shadow-lg transition p-4">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-yellow-500 text-sm">⭐</span>
+                            <h3 class="text-lg font-bold text-gray-900">{{ rule.guideword }}</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm line-clamp-2">{{ rule.can_do_statement }}</p>
+                        <div class="mt-2 flex gap-2">
+                            <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">{{ rule.level }}</span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ rule.super_category }}</span>
+                        </div>
+                    </div>
+                    <div class="text-yellow-600 ml-4">→</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Grammar Rules Grouped by Category -->
+    {% for category, rules in grouped_rules.items() %}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <span class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">{{ category }}</span>
+            <span class="ml-3 text-sm text-gray-600">({{ rules|length }} правил)</span>
+        </h2>
+
+        <div class="grid grid-cols-1 gap-4">
+            {% for rule in rules %}
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition p-6 relative">
+                <a href="/grammar/{{ rule.id }}" class="block">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-lg font-bold text-gray-900">{{ rule.guideword }}</h3>
+                                {% if rule.is_read %}
+                                <span class="text-yellow-500 text-sm" title="Прочитано">⭐</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-gray-600 mt-1">{{ rule.can_do_statement }}</p>
+                            <div class="mt-2 flex gap-2">
+                                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">{{ rule.level }}</span>
+                                {% if rule.sub_category %}
+                                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ rule.sub_category }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-indigo-600 ml-4">→</div>
+                    </div>
+                </a>
+
+                <!-- Quick Mark as Read Button -->
+                <button
+                    hx-post="/grammar/{{ rule.id }}/read"
+                    hx-swap="none"
+                    hx-on::after-request="window.location.reload()"
+                    class="absolute top-4 right-4 {% if rule.is_read %}text-yellow-500{% else %}text-gray-300{% endif %} hover:text-yellow-600 text-2xl"
+                    title="Отметить как прочитанное">
+                    {% if rule.is_read %}⭐{% else %}☆{% endif %}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not grouped_rules %}
+    <div class="text-center text-gray-500 py-12">
+        <p class="text-xl">Правила не найдены</p>
+        <p class="mt-2">Попробуйте изменить фильтры</p>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -53,6 +53,21 @@
                 </p>
             </div>
 
+            <!-- Tenses Progress -->
+            <div class="mb-4">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600">Времена</span>
+                    <span class="font-semibold">{{ data.tenses_completion_pct }}%</span>
+                </div>
+                <div class="bg-gray-200 rounded-full h-3">
+                    <div class="bg-purple-600 h-3 rounded-full transition-all"
+                         style="width: {{ data.tenses_completion_pct }}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                    {{ data.completed_tenses }} / {{ data.total_tenses }} времён
+                </p>
+            </div>
+
             <!-- Status -->
             {% if data.can_advance %}
             <div class="bg-green-50 border border-green-200 rounded p-3 mt-4">

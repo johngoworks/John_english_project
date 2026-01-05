@@ -4,11 +4,12 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Optional
+from collections import defaultdict
 
 from app.database import get_db
 from app.models.tense import Tense
 from app.models.progress import UserTenseProgress
-from app.services import auth_service, gemini_service
+from app.services import auth_service, gemini_service, progress_service
 
 router = APIRouter(prefix="/tenses", tags=["tenses"])
 templates = Jinja2Templates(directory="app/templates")
@@ -32,6 +33,27 @@ async def tenses_list(
     if not user:
         return {"error": "Not authenticated"}
 
+    # Get recently read tenses (only for non-HTMX requests)
+    read_tenses = []
+    if not request.headers.get("HX-Request"):
+        read_tenses_result = await db.execute(
+            select(Tense)
+            .join(UserTenseProgress, Tense.id == UserTenseProgress.tense_id)
+            .where(
+                UserTenseProgress.user_id == user.id,
+                UserTenseProgress.is_read == True
+            )
+            .order_by(UserTenseProgress.last_attempt.desc())
+            .limit(2)  # Show only 2 recent
+        )
+        read_tenses = list(read_tenses_result.scalars().all())
+
+    # Get user's progress to mark read tenses
+    progress_result = await db.execute(
+        select(UserTenseProgress).where(UserTenseProgress.user_id == user.id)
+    )
+    user_progress = {p.tense_id: p for p in progress_result.scalars().all()}
+
     # Build query
     query = select(Tense)
     if level:
@@ -42,7 +64,12 @@ async def tenses_list(
     query = query.offset(offset).limit(limit)
 
     result = await db.execute(query)
-    tenses = result.scalars().all()
+    tenses_list = list(result.scalars().all())
+
+    # Add is_read flag to each tense
+    for tense in tenses_list:
+        progress = user_progress.get(tense.id)
+        tense.is_read = progress.is_read if progress else False
 
     # Check if there are more items
     count_query = select(func.count(Tense.id))
@@ -65,7 +92,7 @@ async def tenses_list(
             "tenses/items_partial.html",
             {
                 "request": request,
-                "tenses": tenses,
+                "tenses": tenses_list,
                 "offset": offset + limit,
                 "has_more": has_more,
                 "selected_level": level,
@@ -77,7 +104,8 @@ async def tenses_list(
         "tenses/list.html",
         {
             "request": request,
-            "tenses": tenses,
+            "tenses": tenses_list,
+            "read_tenses": read_tenses,
             "selected_level": level,
             "selected_category": category,
             "categories": categories,
@@ -110,6 +138,16 @@ async def tense_detail(
     if not tense:
         raise HTTPException(status_code=404, detail="Tense not found")
 
+    # Check if read
+    progress_result = await db.execute(
+        select(UserTenseProgress).where(
+            UserTenseProgress.user_id == user.id,
+            UserTenseProgress.tense_id == tense_id
+        )
+    )
+    progress = progress_result.scalar_one_or_none()
+    is_read = progress.is_read if progress else False
+
     # Generate AI explanation
     prompt = f"""English teacher. Explain tense in Russian, simple language.
 
@@ -136,9 +174,65 @@ Use markdown (##, **). Conversational Russian."""
             "request": request,
             "tense": tense,
             "ai_explanation": ai_explanation,
+            "is_read": is_read,
             "user": user
         }
     )
+
+
+@router.get("/read/all", response_class=HTMLResponse)
+async def all_read_tenses(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Страница со всеми прочитанными временами"""
+    token = request.cookies.get("access_token")
+    if not token:
+        return {"error": "Not authenticated"}
+
+    user = await auth_service.get_current_user_from_token(token, db)
+    if not user:
+        return {"error": "Not authenticated"}
+
+    # Get all read tenses
+    read_tenses_result = await db.execute(
+        select(Tense)
+        .join(UserTenseProgress, Tense.id == UserTenseProgress.tense_id)
+        .where(
+            UserTenseProgress.user_id == user.id,
+            UserTenseProgress.is_read == True
+        )
+        .order_by(UserTenseProgress.last_attempt.desc())
+    )
+    read_tenses = list(read_tenses_result.scalars().all())
+
+    return templates.TemplateResponse(
+        "tenses/read_all.html",
+        {
+            "request": request,
+            "read_tenses": read_tenses,
+            "user": user
+        }
+    )
+
+
+@router.post("/{tense_id}/read")
+async def mark_as_read(
+    tense_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """Отметить время как прочитанное"""
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    user = await auth_service.get_current_user_from_token(token, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    await progress_service.mark_tense_as_read(db, user.id, tense_id)
+    return {"status": "success"}
 
 
 @router.post("/{tense_id}/complete")

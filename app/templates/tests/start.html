@@ -7,12 +7,27 @@
     <div class="bg-white rounded-lg shadow-lg p-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-8">Начать тест</h1>
 
+        <!-- Test Type Selection -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Тип теста</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <a href="/tests/start?test_type=grammar&level={{ selected_level }}"
+                   class="text-center p-4 border-2 rounded-lg font-semibold transition {% if not test_type or test_type == 'grammar' %}bg-indigo-100 border-indigo-600 text-indigo-800{% else %}border-gray-200 text-gray-700 hover:border-gray-300{% endif %}">
+                    Грамматика
+                </a>
+                <a href="/tests/start?test_type=tenses&level={{ selected_level }}"
+                   class="text-center p-4 border-2 rounded-lg font-semibold transition {% if test_type == 'tenses' %}bg-purple-100 border-purple-600 text-purple-800{% else %}border-gray-200 text-gray-700 hover:border-gray-300{% endif %}">
+                    Времена
+                </a>
+            </div>
+        </div>
+
         <!-- Level Selection -->
         <div class="mb-8">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">Выберите уровень</h2>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {% for level in levels %}
-                <a href="?level={{ level }}"
+                <a href="?test_type={{ test_type or 'grammar' }}&level={{ level }}"
                    class="text-center p-6 border-2 rounded-lg hover:border-indigo-600 transition {% if level == selected_level %}bg-indigo-100 border-indigo-600{% else %}border-gray-200{% endif %}">
                     <div class="text-2xl font-bold text-gray-900">{{ level }}</div>
                 </a>
@@ -27,7 +42,7 @@
                 <div class="border-2 border-gray-200 rounded-lg p-4">
                     <h3 class="font-semibold mb-2">Выбор ответа</h3>
                     <p class="text-sm text-gray-600 mb-4">Выберите правильный вариант из 4</p>
-                    <a href="/tests/question?level={{ selected_level }}&question_type=multiple_choice"
+                    <a href="/tests/question?test_type={{ test_type or 'grammar' }}&level={{ selected_level }}&question_type=multiple_choice"
                        class="block bg-indigo-600 text-white text-center px-4 py-2 rounded hover:bg-indigo-700">
                         Начать
                     </a>
@@ -36,7 +51,7 @@
                 <div class="border-2 border-gray-200 rounded-lg p-4">
                     <h3 class="font-semibold mb-2">Заполнить пропуск</h3>
                     <p class="text-sm text-gray-600 mb-4">Введите недостающее слово</p>
-                    <a href="/tests/question?level={{ selected_level }}&question_type=fill_blank"
+                    <a href="/tests/question?test_type={{ test_type or 'grammar' }}&level={{ selected_level }}&question_type=fill_blank"
                        class="block bg-indigo-600 text-white text-center px-4 py-2 rounded hover:bg-indigo-700">
                         Начать
                     </a>
@@ -45,7 +60,7 @@
                 <div class="border-2 border-gray-200 rounded-lg p-4">
                     <h3 class="font-semibold mb-2">Открытый ответ</h3>
                     <p class="text-sm text-gray-600 mb-4">Напишите развернутый ответ</p>
-                    <a href="/tests/question?level={{ selected_level }}&question_type=open_ended"
+                    <a href="/tests/question?test_type={{ test_type or 'grammar' }}&level={{ selected_level }}&question_type=open_ended"
                        class="block bg-indigo-600 text-white text-center px-4 py-2 rounded hover:bg-indigo-700">
                         Начать
                     </a>

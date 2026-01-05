@@ -4,8 +4,9 @@ from typing import Dict, List, Optional
 from datetime import datetime
 
 from app.models.grammar import Grammar
+from app.models.tense import Tense
 from app.models.test_history import TestHistory
-from app.models.progress import UserGrammarProgress
+from app.models.progress import UserGrammarProgress, UserTenseProgress
 from app.services import gemini_service
 from app.config import get_settings
 
@@ -168,3 +169,113 @@ async def get_test_history(
         .limit(limit)
     )
     return list(result.scalars().all())
+
+
+async def create_tense_test_for_user(
+    db: AsyncSession,
+    user_id: int,
+    tense_id: int,
+    question_type: str = "multiple_choice"
+) -> Dict:
+    """Создаёт тест по времени"""
+    import json
+
+    result = await db.execute(select(Tense).where(Tense.id == tense_id))
+    tense = result.scalar_one_or_none()
+
+    if not tense:
+        raise ValueError(f"Tense {tense_id} not found")
+
+    prompt = f"""You must respond with ONLY valid JSON.
+
+Tense: {tense.tense_name}
+Level: {tense.level}
+Usage: {tense.usage}
+Examples: {tense.examples}
+
+Create a multiple-choice question.
+
+JSON structure:
+{{"question": "sentence", "options": ["opt1", "opt2", "opt3", "opt4"], "correct_answer": "opt1"}}"""
+
+    try:
+        result_text = await gemini_service.call_llm(prompt, temperature=0.3, max_tokens=500, use_json=True)
+        result_text = result_text.strip().replace("```json", "").replace("```", "").strip()
+        test_data = json.loads(result_text)
+    except:
+        test_data = {"question": f"Use {tense.tense_name}", "options": ["will", "did", "doing", "done"], "correct_answer": "will"}
+
+    return {
+        "tense_id": tense_id,
+        "tense": tense,
+        "question": test_data["question"],
+        "options": test_data.get("options"),
+        "question_type": question_type,
+        "correct_answer_hidden": test_data["correct_answer"]
+    }
+
+
+async def check_tense_answer(
+    db: AsyncSession,
+    user_id: int,
+    tense_id: int,
+    question: str,
+    user_answer: str,
+    correct_answer: str,
+    question_type: str
+) -> Dict:
+    """Проверяет ответ на тест по времени"""
+    is_correct = user_answer.strip().lower() == correct_answer.strip().lower()
+
+    result = await db.execute(select(Tense).where(Tense.id == tense_id))
+    tense = result.scalar_one_or_none()
+
+    ai_explanation = ""
+    if not is_correct and tense:
+        prompt = f"""Student mistake with {tense.tense_name}.
+Question: {question}
+Wrong: {user_answer}
+Correct: {correct_answer}
+
+Explain in Russian (100 words):
+1. Why wrong
+2. Correct rule
+3. Tip"""
+
+        try:
+            ai_explanation = await gemini_service.call_llm(prompt, temperature=0.5, max_tokens=600)
+        except:
+            ai_explanation = f"Правильный ответ: {correct_answer}"
+
+    progress_result = await db.execute(
+        select(UserTenseProgress).where(
+            UserTenseProgress.user_id == user_id,
+            UserTenseProgress.tense_id == tense_id
+        )
+    )
+    progress = progress_result.scalar_one_or_none()
+
+    if not progress:
+        progress = UserTenseProgress(user_id=user_id, tense_id=tense_id, total_attempts=0, correct_attempts=0)
+        db.add(progress)
+
+    progress.total_attempts += 1
+    if is_correct:
+        progress.correct_attempts += 1
+
+    if progress.correct_attempts >= settings.REQUIRED_CORRECT_ATTEMPTS:
+        progress.completed = True
+
+    progress.last_attempt = datetime.utcnow()
+    await db.commit()
+
+    return {
+        "is_correct": is_correct,
+        "correct_answer": correct_answer,
+        "ai_explanation": ai_explanation,
+        "progress": {
+            "total_attempts": progress.total_attempts,
+            "correct_attempts": progress.correct_attempts,
+            "completed": progress.completed
+        }
+    }

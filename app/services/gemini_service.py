@@ -10,6 +10,36 @@ settings = get_settings()
 client = Groq(api_key=settings.GROQ_API_KEY)
 
 
+async def call_llm(prompt: str, temperature: float = 0.5, max_tokens: int = 500, use_json: bool = False) -> str:
+    """
+    Универсальная функция для вызова LLM (Groq)
+
+    Args:
+        prompt: Текст промпта
+        temperature: Температура генерации (0.0-1.0)
+        max_tokens: Максимальное количество токенов
+        use_json: Использовать JSON mode
+
+    Returns:
+        str: Ответ от LLM
+    """
+    try:
+        kwargs = {
+            "model": settings.GROQ_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "max_tokens": max_tokens
+        }
+
+        if use_json:
+            kwargs["response_format"] = {"type": "json_object"}
+
+        response = client.chat.completions.create(**kwargs)
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Ошибка при генерации: {str(e)}"
+
+
 async def generate_explanation(grammar_rule: Grammar) -> str:
     """
     Генерирует объяснение грамматического правила на русском языке

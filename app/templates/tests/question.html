@@ -5,15 +5,24 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="bg-white rounded-lg shadow-lg p-8">
+        <!-- Test Type and Topic -->
         <div class="mb-6">
-            <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">{{ level }}</span>
-            <span class="ml-2 text-gray-600">{{ test.question_type }}</span>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="{% if test_type == 'tenses' %}bg-purple-100 text-purple-800{% else %}bg-indigo-100 text-indigo-800{% endif %} px-3 py-1 rounded-full text-sm font-semibold">{{ level }}</span>
+                <span class="{% if test_type == 'tenses' %}bg-purple-50 text-purple-700{% else %}bg-blue-50 text-blue-700{% endif %} px-3 py-1 rounded-full text-sm">
+                    {% if test_type == 'tenses' %}Времена{% else %}Грамматика{% endif %}
+                </span>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-700 mb-1">Тема: <span class="text-indigo-600">{{ topic_name }}</span></h2>
+            <p class="text-sm text-gray-500">{{ test.question_type }}</p>
         </div>
 
         <h1 class="text-2xl font-bold text-gray-900 mb-8">{{ test.question }}</h1>
 
         <form action="/tests/answer" method="POST" class="space-y-6">
-            <input type="hidden" name="grammar_id" value="{{ test.grammar_id }}">
+            <input type="hidden" name="grammar_id" value="{{ test.grammar_id if test.grammar_id else '' }}">
+            <input type="hidden" name="tense_id" value="{{ test.tense_id if test.tense_id else '' }}">
+            <input type="hidden" name="test_type" value="{{ test_type }}">
             <input type="hidden" name="question" value="{{ test.question }}">
             <input type="hidden" name="correct_answer" value="{{ test.correct_answer_hidden }}">
             <input type="hidden" name="question_type" value="{{ test.question_type }}">
