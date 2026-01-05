@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str
     GROQ_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
+    # Custom LLM (Ollama via ngrok)
+    CUSTOM_LLM_URL: str = ""
+    CUSTOM_LLM_MODEL: str = ""
+    USE_CUSTOM_LLM: bool = False
+
     # Redis (optional for caching)
     REDIS_URL: str = "redis://localhost:6379"
     USE_REDIS: bool = False

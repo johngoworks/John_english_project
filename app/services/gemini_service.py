@@ -1,13 +1,51 @@
 from groq import Groq
 import json
+import httpx
 from typing import Dict, List, Optional
 from app.config import get_settings
 from app.models.grammar import Grammar
 
 settings = get_settings()
 
-# Configure Groq client
-client = Groq(api_key=settings.GROQ_API_KEY)
+# Configure Groq client (only if not using custom LLM)
+if not settings.USE_CUSTOM_LLM:
+    client = Groq(api_key=settings.GROQ_API_KEY)
+else:
+    client = None
+
+
+async def call_llm(prompt: str, temperature: float = 0.5, max_tokens: int = 500, use_json: bool = False) -> str:
+    """Universal LLM caller - supports both Groq and custom Ollama API"""
+    if settings.USE_CUSTOM_LLM and settings.CUSTOM_LLM_URL:
+        # Use custom Ollama API
+        async with httpx.AsyncClient(timeout=30.0) as http_client:
+            response = await http_client.post(
+                settings.CUSTOM_LLM_URL,
+                json={
+                    "model": settings.CUSTOM_LLM_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": temperature,
+                        "num_predict": max_tokens
+                    }
+                }
+            )
+            result = response.json()
+            return result.get("response", "")
+    else:
+        # Use Groq API
+        kwargs = {
+            "model": settings.GROQ_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "max_tokens": max_tokens
+        }
+        if use_json:
+            kwargs["response_format"] = {"type": "json_object"}
+
+        response = client.chat.completions.create(**kwargs)
+        return response.choices[0].message.content
 
 
 async def generate_explanation(grammar_rule: Grammar) -> str:
@@ -34,13 +72,7 @@ Write 3 short paragraphs (max 150 words):
 Use markdown (##, **). Conversational Russian."""
 
     try:
-        response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.5,
-            max_tokens=800
-        )
-        return response.choices[0].message.content
+        return await call_llm(prompt, temperature=0.5, max_tokens=800)
     except Exception as e:
         return f"Ошибка при генерации объяснения: {str(e)}"
 
@@ -95,14 +127,8 @@ Respond with this exact JSON structure:
 {{"question": "instruction here", "correct_answer": "example answer"}}"""
 
     try:
-        response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=500,
-            response_format={"type": "json_object"}
-        )
-        result_text = response.choices[0].message.content.strip()
+        result_text = await call_llm(prompt, temperature=0.3, max_tokens=500, use_json=True)
+        result_text = result_text.strip()
 
         # Clean JSON response
         if result_text.startswith("```json"):
@@ -174,13 +200,7 @@ Write (max 150 words):
 Tone: kind, simple Russian, markdown formatting."""
 
     try:
-        response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.5,
-            max_tokens=800
-        )
-        explanation = response.choices[0].message.content
+        explanation = await call_llm(prompt, temperature=0.5, max_tokens=800)
 
         # Try to find related rules (simplified)
         related_rules = []
@@ -231,13 +251,7 @@ Format:
 2. [question 2]"""
 
     try:
-        response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.5,
-            max_tokens=600
-        )
-        return response.choices[0].message.content
+        return await call_llm(prompt, temperature=0.5, max_tokens=600)
     except Exception as e:
         return f"Ошибка при генерации вопросов: {str(e)}"
 
@@ -269,14 +283,8 @@ Respond with this exact JSON structure:
 {{"explanation": "Краткое объяснение на русском (1-2 предложения)", "examples": ["First English example sentence", "Second English example sentence", "Third English example sentence"]}}"""
 
     try:
-        response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.4,
-            max_tokens=500,
-            response_format={"type": "json_object"}
-        )
-        result_text = response.choices[0].message.content.strip()
+        result_text = await call_llm(prompt, temperature=0.4, max_tokens=500, use_json=True)
+        result_text = result_text.strip()
 
         # Clean JSON response
         if result_text.startswith("```json"):
@@ -332,14 +340,8 @@ Respond with this exact JSON structure:
 {{"correct_translation": "правильный перевод", "wrong_translations": ["неправильный1", "неправильный2", "неправильный3"]}}"""
 
     try:
-        response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=300,
-            response_format={"type": "json_object"}
-        )
-        result_text = response.choices[0].message.content.strip()
+        result_text = await call_llm(prompt, temperature=0.3, max_tokens=300, use_json=True)
+        result_text = result_text.strip()
 
         # Clean JSON response
         if result_text.startswith("```json"):
