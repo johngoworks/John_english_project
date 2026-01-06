@@ -1,14 +1,15 @@
 # English Learning App
 
-Веб-приложение для изучения английского языка с интеграцией AI (Gemini) для персонализированного обучения.
+Веб-приложение для изучения английского языка с интеграцией AI (Groq LLaMA) для персонализированного обучения.
 
 ## Технологии
 
-- **Backend**: FastAPI + SQLAlchemy (async)
-- **Frontend**: HTMX + Tailwind CSS
-- **AI**: Google Gemini API
-- **Database**: SQLite (dev) / PostgreSQL (prod ready)
-- **Deploy**: Docker / Uvicorn
+- **Backend**: FastAPI + SQLAlchemy 2.0 (async)
+- **Frontend**: HTMX + Tailwind CSS + Jinja2
+- **AI**: Groq API (meta-llama/llama-4-scout-17b-16e-instruct)
+- **Database**: SQLite (async с aiosqlite)
+- **Алгоритм повторений**: Anki Spaced Repetition
+- **Deploy**: Uvicorn
 
 ## Быстрый старт
 
@@ -31,15 +32,20 @@ pip install -r requirements.txt
 # Скопировать .env.example в .env
 cp .env.example .env
 
-# Открыть .env и добавить Gemini API ключ
-# GEMINI_API_KEY="your-actual-api-key-here"
+# Открыть .env и добавить Groq API ключ
+# GROQ_API_KEY="your-actual-api-key-here"
 ```
 
-**Получить Gemini API ключ**: https://makersuite.google.com/app/apikey
+**Получить Groq API ключ**: https://console.groq.com/keys
 
-### 3. Запуск приложения
+### 3. Миграция базы данных
 
-#### Вариант А: Через командную строку
+```bash
+# Применить все миграции (добавляет is_read поля)
+python migrate_database.py
+```
+
+### 4. Запуск приложения
 
 ```bash
 uvicorn app.main:app --reload
@@ -47,87 +53,134 @@ uvicorn app.main:app --reload
 
 Приложение будет доступно на `http://localhost:8000`
 
-#### Вариант Б: Через Docker
-
-```bash
-docker-compose up --build
-```
-
-## API Документация
-
-После запуска доступна по адресу:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-## MVP Функционал
+## Основной функционал
 
 ### ✅ Реализовано
 
-1. **Базовая инфраструктура**
-   - FastAPI приложение
-   - SQLAlchemy модели (User, Grammar, Dictionary, Progress, TestHistory)
-   - Async database setup
+#### 1. **Аутентификация и профиль**
+   - Регистрация и вход с JWT токенами
+   - Личный кабинет с прогрессом по уровням
+   - Отслеживание готовности к следующему уровню (80% правил + 80% слов)
 
-2. **Аутентификация**
-   - Регистрация (POST /api/auth/register)
-   - Вход (POST /api/auth/login)
-   - JWT токены
+#### 2. **Грамматика (1,222 правила A1-C2)**
+   - Просмотр правил с группировкой по категориям
+   - Фильтрация по уровню и категории
+   - AI объяснения на русском языке для каждого правила
+   - ⭐ **Система отметок "прочитано"**:
+     - Отметка правил звездочками
+     - Секция "Недавно прочитанные" (2 последних)
+     - Страница всех прочитанных правил
+   - Тесты по грамматике (3 типа вопросов)
 
-3. **AI Сервисы (Gemini)**
+#### 3. **Времена глаголов (16 времён)**
+   - Полное описание каждого времени:
+     - Формы: утвердительная, отрицательная, вопросительная
+     - Использование и примеры
+     - Временные маркеры
+   - AI объяснения от Groq LLM
+   - ⭐ **Система отметок "прочитано"** (аналогично грамматике)
+   - Тесты по временам
+   - Фильтрация по уровню и категории
+
+#### 4. **Словарь (5,948 слов a1-c2)**
+   - Поиск слов по фильтрам
+   - Изучение с карточками
+   - Отслеживание прогресса
+
+#### 5. **Тестирование**
+   - **3 типа вопросов**:
+     - Multiple Choice (выбор из вариантов)
+     - Fill in the Blank (заполнить пропуск)
+     - Open Ended (открытый ответ с AI проверкой)
+   - Тесты по грамматике и временам
+   - Отображение темы теста в интерфейсе
+   - Подробная обратная связь от AI
+   - История всех попыток
+
+#### 6. **Прогресс и Анки алгоритм**
+   - Spaced Repetition System (SRS) на основе алгоритма Anki
+   - Автоматический расчет интервалов повторений
+   - Ease Factor для адаптации под пользователя
+   - Отслеживание по каждому правилу и слову:
+     - Количество попыток
+     - Процент правильных ответов
+     - Дата следующего повторения
+     - Статус "изучено" / "прочитано"
+
+#### 7. **AI Интеграция (Groq)**
    - Генерация объяснений правил на русском
-   - Генерация тестов (multiple choice, fill blank, open ended)
-   - Анализ ошибок с обратной связью
+   - Создание тестовых вопросов
+   - Проверка открытых ответов
+   - Анализ ошибок с подробным фидбеком
    - Поиск связанных правил
 
-4. **Test Service**
-   - Создание тестов
-   - Проверка ответов
-   - Сохранение истории
+#### 8. **Адаптивный интерфейс**
+   - Mobile-first дизайн
+   - Tailwind CSS стилизация
+   - HTMX для динамических обновлений
+   - Цветовая дифференциация:
+     - 🔵 Грамматика: Indigo/Blue
+     - 🟣 Времена: Purple
+     - ⭐ Прочитанное: Yellow
 
-5. **Progress Tracking**
-   - Отслеживание прогресса по уровням
-   - Подсчет % завершения (80% правил + 80% слов)
-   - Проверка готовности к следующему уровню
+## Структура базы данных
 
-### 🚧 В разработке (следующие шаги)
+База данных уже создана и заполнена:
+- **1,222** грамматических правила (A1-C2)
+- **16** времён глаголов
+- **5,948** слов (a1-c2)
 
-1. **Routes (API endpoints)**
-   - Grammar routes (список, детали, фильтры)
-   - Test routes (старт теста, вопрос, ответ)
-   - Progress routes (dashboard, статистика)
+### Таблицы
 
-2. **Templates (HTML + HTMX)**
-   - base.html с Tailwind CSS
-   - Страницы: login, register, dashboard
-   - Тесты: start, question, result
-   - Progress dashboard
-
-3. **Frontend**
-   - HTMX интеграция
-   - Tailwind стилизация
-   - Интерактивные компоненты
-
-4. **Vocabulary (Flashcards)**
-   - Spaced repetition система
-   - Карточки для изучения слов
+- `users` - пользователи
+- `grammar` - грамматические правила
+  - Поля: super_category, sub_category, level, guideword, can_do_statement, example
+- `tenses` - времена глаголов
+  - Поля: tense_name, category, level, form_positive, form_negative, form_question, usage, examples, time_markers
+- `dictionary` - словарь
+- `user_grammar_progress` - прогресс по грамматике
+  - Включает: completed, is_read, total_attempts, correct_attempts, last_attempt, next_review, interval, ease_factor
+- `user_tense_progress` - прогресс по временам
+  - Включает: completed, is_read, total_attempts, correct_attempts, last_attempt
+- `user_vocabulary_progress` - прогресс по словарю
+- `test_history` - история тестов
 
 ## Структура проекта
 
 ```
 John_english_project/
 ├── app/
-│   ├── models/          # SQLAlchemy models
-│   ├── schemas/         # Pydantic schemas
-│   ├── services/        # Business logic (auth, gemini, test, progress)
-│   ├── routes/          # FastAPI routes (TODO)
-│   ├── templates/       # Jinja2 templates (TODO)
-│   ├── config.py        # Settings
-│   ├── database.py      # DB connection
-│   └── main.py          # FastAPI app
-├── english_learning.db  # SQLite database
+│   ├── models/           # SQLAlchemy модели (User, Grammar, Tense, Dictionary, Progress)
+│   ├── schemas/          # Pydantic схемы
+│   ├── services/         # Бизнес-логика
+│   │   ├── auth_service.py
+│   │   ├── gemini_service.py  # Groq API интеграция
+│   │   ├── test_service.py
+│   │   └── progress_service.py  # Anki SRS алгоритм
+│   ├── routes/           # FastAPI роуты
+│   │   ├── auth.py
+│   │   ├── grammar.py
+│   │   ├── tenses.py
+│   │   ├── vocabulary.py
+│   │   ├── tests.py
+│   │   └── dashboard.py
+│   ├── templates/        # Jinja2 шаблоны
+│   │   ├── grammar/      # Список, детали, прочитанные
+│   │   ├── tenses/       # Список, детали, прочитанные
+│   │   ├── vocabulary/
+│   │   ├── tests/
+│   │   └── dashboard/
+│   ├── config.py         # Настройки (Groq API, DB)
+│   ├── database.py       # Async DB connection
+│   └── main.py           # FastAPI приложение
+├── json_to_backup/       # Исходные JSON данные
+│   ├── grammar.json
+│   └── dictionary.json
+├── english_learning.db   # SQLite база данных
+├── create_database.py    # Скрипт создания БД
+├── migrate_database.py   # Скрипт миграций
+├── reader.py             # Утилита для чтения данных
 ├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
 └── README.md
 ```
 
@@ -139,29 +192,87 @@ John_english_project/
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Тестирование API
+### Полезные скрипты
 
-Используйте Swagger UI: http://localhost:8000/docs
+```bash
+# Создать базу данных с нуля
+python create_database.py
 
-1. Зарегистрировать пользователя: POST /api/auth/register
-2. Войти: POST /api/auth/login
-3. Использовать токен для защищенных endpoints
+# Применить миграции
+python migrate_database.py
 
-## База данных
+# Прочитать данные из БД
+python reader.py
+```
 
-База данных уже создана и заполнена:
-- **1,222** грамматических правил (A1-C2)
-- **5,948** слов (a1-c2)
+### Тестирование
 
-### Схема
+Приложение доступно на `http://localhost:8000`
 
-- `users` - пользователи
-- `grammar` - грамматические правила
-- `dictionary` - словарь
-- `user_grammar_progress` - прогресс по грамматике
-- `user_vocabulary_progress` - прогресс по словарю
-- `test_history` - история тестов
+1. Зарегистрируйтесь на `/register`
+2. Войдите на `/login`
+3. Перейдите в Dashboard для выбора уровня
+4. Изучайте грамматику, времена и слова
+5. Проходите тесты для закрепления материала
+6. Отмечайте изученное звездочками ⭐
+
+## Особенности реализации
+
+### Anki Spaced Repetition Algorithm
+
+Приложение использует адаптированный алгоритм Anki для оптимального повторения:
+
+```python
+# При правильном ответе
+interval = previous_interval * ease_factor
+ease_factor += 0.1  # Увеличиваем (макс 2.5)
+
+# При неправильном ответе
+interval = 1 day
+ease_factor -= 0.2  # Уменьшаем (мин 1.3)
+```
+
+### AI Промпты (Groq)
+
+Примеры промптов для разных задач:
+
+- **Объяснение правил**: "English teacher. Explain in Russian, simple language..."
+- **Генерация тестов**: "Create multiple choice question for grammar rule..."
+- **Проверка ответов**: "Check if answer is correct. Grammar rule: ..."
+- **Анализ ошибок**: "Explain why answer is wrong and what is correct..."
+
+### HTMX интеграция
+
+Динамические обновления без перезагрузки страницы:
+- Отметка "прочитано" с автообновлением
+- Ленивая загрузка списков (infinite scroll)
+- Отправка форм тестов
+
+## Миграция с Gemini на Groq
+
+Проект изначально использовал Google Gemini, но был мигрирован на Groq API для:
+- Более быстрых ответов
+- Открытой модели LLaMA 4
+- Лучшей стабильности
+
+## API Документация
+
+После запуска доступна по адресу:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Требования
+
+- Python 3.10+
+- SQLite 3
+- Groq API ключ
 
 ## Лицензия
 
 MIT
+
+---
+
+**Автор**: John
+**Версия**: 2.0
+**Последнее обновление**: Январь 2025
